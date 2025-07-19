@@ -47,3 +47,20 @@ tasks.named('test') {
     // Use JUnit Platform for unit tests.
     useJUnitPlatform()
 }
+
+task fatJar(type: Jar) {
+    archiveBaseName = "${project.name}-all"
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    manifest {
+        attributes(
+            'Main-Class': application.mainClass.get() // keep this if mainClass is a Provider
+        )
+    }
+    from {
+        configurations.runtimeClasspath.filter { it.name.endsWith('.jar') }.collect { zipTree(it) }
+    }
+    with jar
+}
+
+
+
