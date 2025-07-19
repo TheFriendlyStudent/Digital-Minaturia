@@ -17,9 +17,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.io.InputStream;
 import java.io.FileOutputStream;
-import java.nio.file.Files;
-import java.io.FileNotFoundException;
-import java.nio.file.StandardCopyOption;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -51,7 +48,8 @@ public class SVGMapViewer {
     private Element selectedElement = null;
     private static ArrayList<Province> provinceList = new ArrayList<>();
     private static ArrayList<Country> countryList = new ArrayList<>();
-    private static ArrayList<Entity> technologyList = new ArrayList<>();
+
+     private static ArrayList<Entity> technologyList = new ArrayList<>();
     private static HashMap<String, Entity> entityMap = new HashMap<>();
     private final File dataDir = new File(System.getProperty("user.home"), "MinaturiaData");
 
@@ -102,7 +100,7 @@ technologyList = ProvinceParser.parseItems(
 File invFile = new File(dataDir, country.getName() + " Inventory.csv");
 if (!invFile.exists()) {
     // Optional: copy a default, or create empty file
-    copyResourceToFile(invFile.getName(), new File(dataDir, invFile.getName()));
+    invFile.createNewFile(); // or call copyResourceToFile(...) if you have a default version
 }
 ProvinceParser.parseInventory(new FileReader(invFile), country, entityMap);
         }
@@ -245,7 +243,6 @@ ProvinceParser.parseInventory(new FileReader(invFile), country, entityMap);
         svgCanvas.setBackground(Color.BLACK);
 
         File svgFile = new File(dataDir, "Minaturia Map.svg");
-
         String parser = XMLResourceDescriptor.getXMLParserClassName();
         SAXSVGDocumentFactory factory = new SAXSVGDocumentFactory(parser);
         Document parsedDoc = factory.createDocument(svgFile.toURI().toString());
