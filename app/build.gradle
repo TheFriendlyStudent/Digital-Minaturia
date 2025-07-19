@@ -49,17 +49,26 @@ tasks.named('test') {
 }
 
 task fatJar(type: Jar) {
-    archiveBaseName = "${project.name}-all"
+    archiveBaseName = "Digital_Minaturia"
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     manifest {
         attributes(
-            'Main-Class': application.mainClass.get() // keep this if mainClass is a Provider
+            'Main-Class': application.mainClass.get()
         )
     }
-    from {
-        configurations.runtimeClasspath.filter { it.name.endsWith('.jar') }.collect { zipTree(it) }
+from {
+    configurations.runtimeClasspath.collect { file ->
+        if (file.isDirectory()) {
+            file
+        } else {
+            zipTree(file).matching {
+                exclude 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA'
+            }
+        }
     }
-    with jar
+}
+
+    from sourceSets.main.output  // <-- this includes your compiled .class files
 }
 
 

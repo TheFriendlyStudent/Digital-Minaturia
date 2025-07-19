@@ -3,7 +3,6 @@ package org.whogames.digitalminaturia;
 import javax.swing.SwingUtilities;
 
 public class Main {
-
     public static void main(String[] args) {
         SVGMapViewer exs = new SVGMapViewer();
         SwingUtilities.invokeLater(() -> {
