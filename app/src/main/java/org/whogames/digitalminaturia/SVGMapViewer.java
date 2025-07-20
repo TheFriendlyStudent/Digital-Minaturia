@@ -49,7 +49,7 @@ public class SVGMapViewer {
     private static ArrayList<Province> provinceList = new ArrayList<>();
     private static ArrayList<Country> countryList = new ArrayList<>();
 
-     private static ArrayList<Entity> technologyList = new ArrayList<>();
+    private static ArrayList<Entity> technologyList = new ArrayList<>();
     private static HashMap<String, Entity> entityMap = new HashMap<>();
     private final File dataDir = new File(System.getProperty("user.home"), "MinaturiaData");
 
@@ -281,12 +281,9 @@ ProvinceParser.parseInventory(new FileReader(invFile), country, entityMap);
             } else {
                 updateInventoryForCountry(currentProvince.getCountry());
                 try {
-                    ProvinceParser.writeInventoryToCSV(
-    getCountryByName(currentProvince.getCountry()),
-    new File(dataDir, currentProvince.getCountry() + " Inventory.csv").getAbsolutePath()
-);
+                    ProvinceParser.writeInventoryToCSV(getCountryByName(currentProvince.getCountry()), new File(dataDir, currentProvince.getCountry() + " Inventory.csv").getAbsolutePath());
 
-                                } catch (IOException e1) {
+                } catch (IOException e1) {
                     // TODO Auto-generated catch block
                     e1.printStackTrace();
                 }

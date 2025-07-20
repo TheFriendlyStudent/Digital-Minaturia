@@ -7,7 +7,7 @@ public class Firearm implements Entity {
     private int units;
     private String country;
     private double cost;
-    public static String types[] = {"Assault Rifle", "Rifle", "Howitzer", "Battle Rifle", "RPG", "Handgun", "HMG", "SMG", "GPMG", "LMG", "Cannon", "Autocannon", "Grenade Launcher", "Rifle Grenade", "Recoilless Gun"};
+    public static String types[] = {"Assault Rifle", "Rifle", "Howitzer", "Battle Rifle", "RPG", "Handgun", "HMG", "SMG", "GPMG", "LMG", "Cannon", "Cannon Round", "Autocannon", "Grenade Launcher", "Rifle Grenade", "Recoilless Gun"};
 
     public Firearm(String name, String type, String country, int units, double cost) {
         this.name = name;
