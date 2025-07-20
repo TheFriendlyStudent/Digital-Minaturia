@@ -6,9 +6,15 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Graphics;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.NoninvertibleTransformException;
+import java.awt.geom.Point2D;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
@@ -33,6 +39,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JSlider;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 import javax.swing.plaf.basic.BasicScrollBarUI;
 import javax.swing.text.Caret;
@@ -67,6 +74,11 @@ public class SVGMapViewer {
     private JButton foodInput;
     private JSlider fuelSlider;
     private JComboBox<String> resourceSelect;
+
+    private double zoomFactor = 1.0;
+    private final double zoomStep = 0.1;  // zoom increment
+    private final double zoomMin = 0.5;   // 50% min zoom
+    private final double zoomMax = 3.0;   // 300% max zoom
 
     public void createAndShowGUI() throws Exception {
 
@@ -214,15 +226,13 @@ public class SVGMapViewer {
         infoPanel.add(updateButton);
 
         // Setup layered pane for svg and overlays
-        JPanel svgWrapper = new JPanel(null); // null layout to control exact positioning
+        JPanel svgWrapper = new JPanel(new BorderLayout()); 
         svgWrapper.setPreferredSize(new Dimension(2000, 1250)); // your actual SVG size
-        svgWrapper.add(svgCanvas);
+        svgWrapper.add(svgCanvas, BorderLayout.CENTER);
         svgWrapper.setBackground(Color.BLACK);
         svgWrapper.setOpaque(true);
-        svgCanvas.setBounds(0, 0, 2000, 1250);
         svgWrapper.setBounds(0, 0, 2000, 1250);  // Add this!
         JLayeredPane layeredPane = new JLayeredPane();
-        // Set preferred size to your SVG native size or a default
         layeredPane.setPreferredSize(new Dimension(2000, 1250));
         layeredPane.add(svgWrapper, JLayeredPane.DEFAULT_LAYER);
 
@@ -255,9 +265,12 @@ public class SVGMapViewer {
 
         svgCanvas.setDocumentState(JSVGCanvas.ALWAYS_DYNAMIC);
         svgCanvas.setBackground(Color.BLACK);
+        AffineTransform at = AffineTransform.getScaleInstance(zoomFactor, zoomFactor);
+        svgCanvas.setRenderingTransform(at, true);
 
         JScrollPane scrollPane = new JScrollPane(layeredPane); 
         scrollPane.setViewportView(layeredPane);
+        scrollPane.setPreferredSize(new Dimension(1000, 625));
  
         scrollPane.setBackground(Color.BLACK);
         scrollPane.getVerticalScrollBar().setUI(new BasicScrollBarUI() {
@@ -311,11 +324,10 @@ scrollPane.getHorizontalScrollBar().setUI(new BasicScrollBarUI() {
         return button;
     }
 });
-
+scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
 scrollPane.getVerticalScrollBar().setPreferredSize(new Dimension(8, 0));
 scrollPane.getHorizontalScrollBar().setPreferredSize(new Dimension(0, 8));
-scrollPane.setPreferredSize(new Dimension(2000, 1250));
-
 
       
 
@@ -508,8 +520,56 @@ ProvinceParser.writeProvincesToCSV(provinceList, new File(dataDir, "Minaturia Pr
                 foodInput.setBounds(x, y + spacing * 2, width, height);
                 System.out.println("layeredPane preferred size: " + layeredPane.getPreferredSize());
                 System.out.println("scroll view size: " + scrollPane.getViewport().getViewSize());
+                // When zoom changes or size changes:
+
+svgCanvas.revalidate();
+svgCanvas.repaint();
+
+
+                svgWrapper.revalidate();
+                svgWrapper.repaint();
+                scrollPane.revalidate();
+                scrollPane.repaint();
             }
         });
+
+svgCanvas.addMouseWheelListener(new MouseWheelListener() {
+    @Override
+    public void mouseWheelMoved(MouseWheelEvent e) {
+        int notches = e.getWheelRotation();
+        if (notches < 0) {
+            zoomFactor = Math.min(zoomFactor + zoomStep, zoomMax);
+        } else {
+            zoomFactor = Math.max(zoomFactor - zoomStep, zoomMin);
+        }
+
+        Point mousePoint = e.getPoint();
+        AffineTransform currentTransform = svgCanvas.getRenderingTransform();
+
+        try {
+            Point2D mouseInUserSpace = currentTransform.inverseTransform(mousePoint, null);
+            AffineTransform newTransform = new AffineTransform();
+            newTransform.translate(mousePoint.getX(), mousePoint.getY());
+            newTransform.scale(zoomFactor, zoomFactor);
+            newTransform.translate(-mouseInUserSpace.getX(), -mouseInUserSpace.getY());
+
+            svgCanvas.setRenderingTransform(newTransform, true);
+
+            // DO NOT resize components here
+
+            svgCanvas.revalidate();
+            svgCanvas.repaint();
+
+            scrollPane.revalidate();
+            scrollPane.repaint();
+
+        } catch (NoninvertibleTransformException ex) {
+            ex.printStackTrace();
+        }
+    }
+});
+
+
 
         frame.pack();
         frame.setLocationRelativeTo(null);
@@ -517,6 +577,7 @@ ProvinceParser.writeProvincesToCSV(provinceList, new File(dataDir, "Minaturia Pr
         System.out.println("svgWrapper size: " + svgWrapper.getSize());
 
     }
+
 
     private void updateInventoryForCountry(String country) {
         if (country == null) {
