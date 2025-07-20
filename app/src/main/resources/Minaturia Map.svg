@@ -333,58 +333,5 @@
     <path id="68" data-name="68" class="cls-3" d="M313.5,443.5c-5,5-5,8-5,9s1.783,9.3,9.891,7.65,11.283-5.784,10.696-8.217-.239-6.433,2.087-8.433,3.674-2.186,0-6.593-5.722-6.146-10.198-1.777-7.476,8.37-7.476,8.37Z"/>
     <path id="115" data-name="115" class="cls-3" d="M1376,620h-1.5v3.217l-2.5,2.783-2,1.522.739,1.957-1.739,1.522-2.467-.217-1.468-.13-2.935,1.348h-3.13l-6,1-2,2-4,1-2,2-1-3-2.862.739-3.138,1.261-4.5-.087s-1.5,1.087-1.5,2.087c0-1,1.5-2.087,1.5-2.087,0,0-1.5,1.087-1.5,2.087s-3.638-.13-3.638-.13c0,0-3.362-1.87-4.362-1.565s1-3.304,1.181-3.13.949-4.696.949-4.696c0,0-1.13-2.478-.949-3.717s.819-1.761.819-1.761l2.362-2.935.899-2.849,2.152-.347,4.587-4.87,5.138-3.087,3.862-4.304h1.85-1.85,1.85v2.152l1.715,1.957,9.134,4.5,5.301,2.783,7,1.913,4.5-1.043,1.5,2.13Z"/>
   </g>
-<g id="Layer_production" inkscape:groupmode="layer" inkscape:label="Production" style="display:none">
-  <!-- Moved down and to the right to avoid Swing overlays -->
-  <rect id="inventoryBox" x="550" y="350" width="400" height="160" fill="black" stroke="white" stroke-width="2" rx="10" ry="10"/>
-  
-  <!-- White monospaced terminal-style text as a list -->
-  <text x="570" y="390" font-family="monospace" font-size="18" fill="white">
-    Production Info:
-  </text>
-  <text x="580" y="420" font-family="monospace" font-size="14" fill="white">
-    - Food: 500 units
-  </text>
-  <text x="580" y="445" font-family="monospace" font-size="14" fill="white">
-    - Fuel: 300 units
-  </text>
-  <text x="580" y="470" font-family="monospace" font-size="14" fill="white">
-    - Water: 120 units
-  </text>
-</g>
-
-  <g id="Layer_economy" inkscape:groupmode="layer" inkscape:label="Economy" style="display:none">
-  <!-- A light gray rectangle as the text box background -->
-  <rect x="50" y="50" width="300" height="100" fill="#000000" stroke="#ffffff" stroke-width="2" rx="10" ry="10"/>
-  
-  <!-- Text inside the text box -->
-  <text x="60" y="100" font-family="monospace" font-size="18" fill="#ffffff">
-    Production Info:
-  </text>
-  <text x="60" y="130" font-family="monospace" font-size="14" fill="#ffffff">
-    Food: 500 units
-  </text>
-  <text x="60" y="155" font-family="monospace" font-size="14" fill="#ffffff">
-    Fuel: 300 units
-  </text>
-</g>
-
-<g id="Layer_research" inkscape:groupmode="layer" inkscape:label="Research" style="display:none">
-  <!-- Moved down and to the right to avoid Swing overlays -->
-  <rect id="inventoryBox" x="550" y="350" width="400" height="160" fill="black" stroke="white" stroke-width="2" rx="10" ry="10"/>
-  
-  <!-- White monospaced terminal-style text as a list -->
-  <text x="570" y="390" font-family="monospace" font-size="18" fill="white">
-    Production Info:
-  </text>
-  <text x="580" y="420" font-family="monospace" font-size="14" fill="white">
-    - Food: 500 units
-  </text>
-  <text x="580" y="445" font-family="monospace" font-size="14" fill="white">
-    - Fuel: 300 units
-  </text>
-  <text x="580" y="470" font-family="monospace" font-size="14" fill="white">
-    - Water: 120 units
-  </text>
-</g>
 
 </svg>

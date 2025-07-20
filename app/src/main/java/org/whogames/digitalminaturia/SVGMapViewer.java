@@ -1,6 +1,7 @@
 package org.whogames.digitalminaturia;
 
 import java.awt.BorderLayout;
+import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -67,6 +68,7 @@ public class SVGMapViewer {
     private static ArrayList<Entity> technologyList = new ArrayList<>();
     private static HashMap<String, Entity> entityMap = new HashMap<>();
     private final File dataDir = new File(System.getProperty("user.home"), "MinaturiaData");
+    private final String[] SvgFiles = new String[]{"Minaturia Map", "Economy Layer", "Production Layer", "Research Layer"}; 
 
     JSVGCanvas svgCanvas = new JSVGCanvas();
 
@@ -94,6 +96,9 @@ public class SVGMapViewer {
         copyResourceToFile("Minaturia Provinces.csv", new File(dataDir, "Minaturia Provinces.csv"));
         copyResourceToFile("Minaturia Technology.csv", new File(dataDir, "Minaturia Technology.csv"));
         copyResourceToFile("Minaturia Map.svg", new File(dataDir, "Minaturia Map.svg"));
+        copyResourceToFile("Production Layer.svg", new File(dataDir, "Production Layer.svg"));
+        copyResourceToFile("Production Layer.svg", new File(dataDir, "Research Layer.svg"));
+        copyResourceToFile("Production Layer.svg", new File(dataDir, "Economy Layer.svg"));
     } catch (IOException e) {
         e.printStackTrace();
         showStyledDialog("Failed to load game data files: " + e.getMessage());
@@ -117,6 +122,19 @@ public class SVGMapViewer {
     JFrame frame = new JFrame("Minaturia");
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     frame.setLayout(new BorderLayout());
+
+    JLayeredPane economyPanel = new JLayeredPane();
+economyPanel.setBackground(Color.BLACK);
+economyPanel.setPreferredSize(new Dimension(2000, 1250));
+
+JLayeredPane productionPanel = new JLayeredPane();
+productionPanel.setBackground(Color.BLACK);
+productionPanel.setPreferredSize(new Dimension(2000, 1250));
+
+JLayeredPane researchPanel = new JLayeredPane();
+researchPanel.setBackground(Color.BLACK);
+researchPanel.setPreferredSize(new Dimension(2000, 1250));
+
 
     JPanel topPanel = new JPanel() {
         @Override
@@ -229,15 +247,18 @@ public class SVGMapViewer {
         infoPanel.add(updateButton);
 
         // Setup layered pane for svg and overlays
-        JPanel svgWrapper = new JPanel(new BorderLayout()); 
+        JLayeredPane svgWrapper = new JLayeredPane(); 
         svgWrapper.setPreferredSize(new Dimension(2000, 1250)); // your actual SVG size
-        svgWrapper.add(svgCanvas, BorderLayout.CENTER);
+        svgWrapper.add(svgCanvas, JLayeredPane.DEFAULT_LAYER);
         svgWrapper.setBackground(Color.BLACK);
         svgWrapper.setOpaque(true);
         svgWrapper.setBounds(0, 0, 2000, 1250);  // Add this!
-        JLayeredPane layeredPane = new JLayeredPane();
-        layeredPane.setPreferredSize(new Dimension(2000, 1250));
-        layeredPane.add(svgWrapper, JLayeredPane.DEFAULT_LAYER);
+        JPanel cards = new JPanel(new CardLayout());
+        cards.setPreferredSize(new Dimension(2000, 1250));
+        cards.add(svgWrapper, "Map");
+        cards.add(economyPanel, "Economy");
+        cards.add(productionPanel, "Production");
+        cards.add(researchPanel, "Research");
 
         Font consoleFont = new Font("Monospaced", Font.PLAIN, 14);
 
@@ -262,17 +283,18 @@ public class SVGMapViewer {
         resourceSelect.setFont(consoleFont);
         resourceSelect.setBorder(BorderFactory.createLineBorder(Color.WHITE));
 
-        layeredPane.add(fuelSlider, JLayeredPane.PALETTE_LAYER);
-        layeredPane.add(resourceSelect, JLayeredPane.PALETTE_LAYER);
-        layeredPane.add(foodInput, JLayeredPane.PALETTE_LAYER);
+        productionPanel.add(fuelSlider, JLayeredPane.PALETTE_LAYER);
+        productionPanel.add(resourceSelect, JLayeredPane.PALETTE_LAYER);
+        productionPanel.add(foodInput, JLayeredPane.PALETTE_LAYER);
 
         svgCanvas.setDocumentState(JSVGCanvas.ALWAYS_DYNAMIC);
         svgCanvas.setBackground(Color.BLACK);
+        svgCanvas.setBounds(0, 0, 2000, 1250);
         AffineTransform at = AffineTransform.getScaleInstance(zoomFactor, zoomFactor);
         svgCanvas.setRenderingTransform(at, true);
 
-        JScrollPane scrollPane = new JScrollPane(layeredPane); 
-        scrollPane.setViewportView(layeredPane);
+        JScrollPane scrollPane = new JScrollPane(cards); 
+        scrollPane.setViewportView(cards);
         scrollPane.setPreferredSize(new Dimension(1000, 625));
  
         scrollPane.setBackground(Color.BLACK);
@@ -332,8 +354,11 @@ scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_
 scrollPane.getVerticalScrollBar().setPreferredSize(new Dimension(8, 0));
 scrollPane.getHorizontalScrollBar().setPreferredSize(new Dimension(0, 8));
 
-      
-
+       /*for (String svgFile : SvgFiles){
+            File s = new File(dataDir, svgFile);
+            String parser = XMLResourceDescriptor.getXMLParserClassName();
+            SAXSVGDocumentFactory factory = new SAXSVGDocumentFactory(parser);
+        } */
         File svgFile = new File(dataDir, "Minaturia Map.svg");
         String parser = XMLResourceDescriptor.getXMLParserClassName();
         SAXSVGDocumentFactory factory = new SAXSVGDocumentFactory(parser);
@@ -360,13 +385,24 @@ scrollPane.getHorizontalScrollBar().setPreferredSize(new Dimension(0, 8));
             System.out.println("fill:(#" + province.getCountry() + ");stroke:white;stroke-width:1;");
 
         }
- 
-        setVisibleLayerSafe("Layer_map");
 
-        // Button listeners
-        mapButton.addActionListener(e -> setVisibleLayerSafe("Layer_map"));
-        economyButton.addActionListener(e -> setVisibleLayerSafe("Layer_economy"));
-        productionButton.addActionListener(e -> setVisibleLayerSafe("Layer_production"));
+        mapButton.addActionListener(e -> {
+            CardLayout c = (CardLayout)cards.getLayout();
+            c.show(cards, "Map");
+        });
+        economyButton.addActionListener(e -> {
+            CardLayout c = (CardLayout)cards.getLayout();
+            c.show(cards, "Economy");
+        });
+        productionButton.addActionListener(e -> {
+            CardLayout c = (CardLayout)cards.getLayout();
+            c.show(cards, "Production");
+        });
+        researchButton.addActionListener(e -> {
+            CardLayout c = (CardLayout)cards.getLayout();
+            c.show(cards, "Research");
+        });
+
         foodInput.addActionListener(e -> {
             if (currentProvince == null || currentProvince.getCountry() == null) {
                 JOptionPane.showMessageDialog(svgCanvas, "No province selected.");
@@ -503,7 +539,7 @@ ProvinceParser.writeProvincesToCSV(provinceList, new File(dataDir, "Minaturia Pr
         frame.setResizable(true);
 
         // *** Add component listener to reposition overlays on resize ***
-        layeredPane.addComponentListener(new ComponentAdapter() {
+        cards.addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
 
@@ -521,14 +557,12 @@ ProvinceParser.writeProvincesToCSV(provinceList, new File(dataDir, "Minaturia Pr
                 resourceSelect.setBounds(x, y, width, height);
                 fuelSlider.setBounds(x, y + spacing, width + 70, height);
                 foodInput.setBounds(x, y + spacing * 2, width, height);
-                System.out.println("layeredPane preferred size: " + layeredPane.getPreferredSize());
+                System.out.println("layeredPane preferred size: " + cards.getPreferredSize());
                 System.out.println("scroll view size: " + scrollPane.getViewport().getViewSize());
                 // When zoom changes or size changes:
 
-svgCanvas.revalidate();
-svgCanvas.repaint();
-
-
+                svgCanvas.revalidate();
+                svgCanvas.repaint();
                 svgWrapper.revalidate();
                 svgWrapper.repaint();
                 scrollPane.revalidate();
@@ -571,9 +605,6 @@ svgCanvas.addMouseWheelListener(new MouseWheelListener() {
         }
     }
 });
-
-
-
         frame.pack();
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
@@ -603,29 +634,6 @@ svgCanvas.addMouseWheelListener(new MouseWheelListener() {
             }
             JOptionPane.showMessageDialog(svgCanvas, "Added");
         }
-    }
-
-    public void setVisibleLayer(SVGDocument doc, String layerIdToShow) {
-        NodeList layers = doc.getElementsByTagName("g");
-
-        for (int i = 0; i < layers.getLength(); i++) {
-            Element layer = (Element) layers.item(i);
-            String id = layer.getAttribute("id");
-
-            if ("Layer_3".equals(id)) {
-                layer.setAttribute("style", "opacity:1; pointer-events: none;");
-            } else if (layerIdToShow.equals(id)) {
-                layer.setAttribute("style", "opacity:1; pointer-events: all;");
-            } else {
-                layer.setAttribute("style", "opacity:0; pointer-events: none;");
-            }
-        }
-
-        // Show/hide production UI controls
-        boolean showProductionControls = "Layer_production".equals(layerIdToShow);
-        setProductionControlsVisible(foodInput, fuelSlider, resourceSelect, showProductionControls);
-
-        svgCanvas.repaint();
     }
 
     public void updateProductionLayer(Country country) {
@@ -746,26 +754,6 @@ private void showStyledDialog(String message) {
     JOptionPane.showMessageDialog(null, textArea);
 }
 
-    private void setVisibleLayerSafe(String layerIdToShow) {
-        if (svgCanvas.getUpdateManager() != null) {
-            // Run inside Batik's update thread to ensure immediate update
-            svgCanvas.getUpdateManager().getUpdateRunnableQueue().invokeLater(() -> {
-                setVisibleLayer(svgCanvas.getSVGDocument(), layerIdToShow);
-            });
-        } else {
-            // UpdateManager not ready yet, wait for it after render
-            svgCanvas.addGVTTreeRendererListener(new GVTTreeRendererAdapter() {
-                public void gvtRenderingCompleted(GVTTreeRendererEvent e) {
-                    svgCanvas.getUpdateManager().getUpdateRunnableQueue().invokeLater(() -> {
-                        setVisibleLayer(svgCanvas.getSVGDocument(), layerIdToShow);
-                    });
-                    // Remove listener after use to avoid repeated calls
-                    svgCanvas.removeGVTTreeRendererListener(this);
-                }
-            });
-        }
-    }
-
     private void addField(JPanel panel, String labelText, JTextField field, Font font) {
         JLabel label = new JLabel(labelText);
         label.setFont(font);
@@ -800,12 +788,6 @@ private void showStyledDialog(String message) {
             }
         }
         return null;
-    }
-
-    public void setProductionControlsVisible(JButton foodInput, JSlider fuelSlider, JComboBox<String> resourceSelect, boolean visible) {
-        foodInput.setVisible(visible);
-        fuelSlider.setVisible(visible);
-        resourceSelect.setVisible(visible);
     }
 
     public ArrayList<String> getTechByCountry(String country) {
