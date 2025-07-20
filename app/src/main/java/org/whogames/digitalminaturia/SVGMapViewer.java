@@ -57,6 +57,7 @@ import org.w3c.dom.NodeList;
 import org.w3c.dom.events.EventTarget;
 import org.w3c.dom.svg.SVGDocument;
 
+
 public class SVGMapViewer {
 
     private Element selectedElement = null;
@@ -166,8 +167,10 @@ public class SVGMapViewer {
     JButton mapButton = new JButton("Map");
     JButton economyButton = new JButton("Economy");
     JButton productionButton = new JButton("Production");
+    JButton researchButton = new JButton("Research");
 
-    JButton[] buttons = {mapButton, economyButton, productionButton};
+
+    JButton[] buttons = {mapButton, economyButton, productionButton, researchButton};
     for (JButton btn : buttons) {
         styleButton(btn, buttonFont);
         buttonPanel.add(btn);
