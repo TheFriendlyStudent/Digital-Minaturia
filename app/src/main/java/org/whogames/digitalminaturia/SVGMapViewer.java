@@ -6,6 +6,8 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Rectangle;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.io.File;
@@ -29,7 +31,10 @@ import javax.swing.JLayeredPane;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.text.Caret;
+import javax.swing.text.DefaultCaret;
 
 import org.apache.batik.anim.dom.SAXSVGDocumentFactory;
 import org.apache.batik.swing.JSVGCanvas;
@@ -63,135 +68,125 @@ public class SVGMapViewer {
 
     public void createAndShowGUI() throws Exception {
 
-        // Ensure the data folder exists
-if (!dataDir.exists()) {
-    dataDir.mkdirs();
-}
+    // Ensure the data folder exists
+    if (!dataDir.exists()) {
+        dataDir.mkdirs();
+    }
 
-// Copy default CSVs from resources on first launch
-try {
-    copyResourceToFile("Minaturia Countries.csv", new File(dataDir, "Minaturia Countries.csv"));
-    copyResourceToFile("Minaturia Provinces.csv", new File(dataDir, "Minaturia Provinces.csv"));
-    copyResourceToFile("Minaturia Technology.csv", new File(dataDir, "Minaturia Technology.csv"));
-    copyResourceToFile("Minaturia Map.svg", new File(dataDir, "Minaturia Map.svg"));
-    // You can skip per-country inventory here and create them on demand later
-} catch (IOException e) {
-    e.printStackTrace();
-    JOptionPane.showMessageDialog(null, "Failed to load game data files: " + e.getMessage());
-}
+    // Copy default CSVs from resources on first launch
+    try {
+        copyResourceToFile("Minaturia Countries.csv", new File(dataDir, "Minaturia Countries.csv"));
+        copyResourceToFile("Minaturia Provinces.csv", new File(dataDir, "Minaturia Provinces.csv"));
+        copyResourceToFile("Minaturia Technology.csv", new File(dataDir, "Minaturia Technology.csv"));
+        copyResourceToFile("Minaturia Map.svg", new File(dataDir, "Minaturia Map.svg"));
+    } catch (IOException e) {
+        e.printStackTrace();
+        showStyledDialog("Failed to load game data files: " + e.getMessage());
+    }
 
+    countryList = ProvinceParser.parseCountries(new FileReader(new File(dataDir, "Minaturia Countries.csv")));
+    provinceList = ProvinceParser.parseProvinces(new FileReader(new File(dataDir, "Minaturia Provinces.csv")));
+    technologyList = ProvinceParser.parseItems(new FileReader(new File(dataDir, "Minaturia Technology.csv")));
 
-countryList = ProvinceParser.parseCountries(
-    new FileReader(new File(dataDir, "Minaturia Countries.csv"))
-);
-provinceList = ProvinceParser.parseProvinces(
-    new FileReader(new File(dataDir, "Minaturia Provinces.csv"))
-);
-technologyList = ProvinceParser.parseItems(
-    new FileReader(new File(dataDir, "Minaturia Technology.csv"))
-);
-
-
-        for (Entity tech : technologyList) {
-            entityMap.put(tech.getName(), tech);
+    for (Entity tech : technologyList) {
+        entityMap.put(tech.getName(), tech);
+    }
+    for (Country country : countryList) {
+        File invFile = new File(dataDir, country.getName() + " Inventory.csv");
+        if (!invFile.exists()) {
+            invFile.createNewFile();
         }
-        for (Country country : countryList) {
+        ProvinceParser.parseInventory(new FileReader(invFile), country, entityMap);
+    }
 
-File invFile = new File(dataDir, country.getName() + " Inventory.csv");
-if (!invFile.exists()) {
-    // Optional: copy a default, or create empty file
-    invFile.createNewFile(); // or call copyResourceToFile(...) if you have a default version
-}
-ProvinceParser.parseInventory(new FileReader(invFile), country, entityMap);
+    JFrame frame = new JFrame("Minaturia");
+    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    frame.setLayout(new BorderLayout());
+
+    JPanel topPanel = new JPanel() {
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            g.setColor(new Color(255, 255, 255, 25));
+            for (int y = 0; y < getHeight(); y += 4) {
+                g.drawLine(0, y, getWidth(), y);
+            }
         }
+    };
+    topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
+    topPanel.setBackground(Color.BLACK);
+    topPanel.setPreferredSize(new Dimension(1920, 100));
 
-        JFrame frame = new JFrame("Minaturia");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setLayout(new BorderLayout());
+    JLabel countryNameLabel = new JLabel("COUNTRY: NONE SELECTED");
+    JLabel capitalLabel = new JLabel("Capital: ");
+    JLabel populationLabel = new JLabel("Population: ");
 
-        // Top panel setup
-        JPanel topPanel = new JPanel();
-        topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
-        topPanel.setBackground(Color.BLACK);
-        topPanel.setPreferredSize(new Dimension(1920, 100));
+    JLabel[] labels = {countryNameLabel, capitalLabel, populationLabel};
+    for (JLabel label : labels) {
+        label.setFont(new Font("Monospaced", Font.BOLD, 18));
+        label.setForeground(Color.WHITE);
+        label.setAlignmentX(Component.LEFT_ALIGNMENT);
+    }
 
-        JLabel countryNameLabel = new JLabel("COUNTRY: NONE SELECTED");
-        countryNameLabel.setFont(new Font("Monospaced", Font.BOLD, 18));
-        countryNameLabel.setForeground(Color.WHITE);
-        countryNameLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+    topPanel.add(countryNameLabel);
+    topPanel.add(capitalLabel);
+    topPanel.add(populationLabel);
 
-        JLabel capitalLabel = new JLabel("Capital: ");
-        capitalLabel.setFont(new Font("Monospaced", Font.PLAIN, 14));
-        capitalLabel.setForeground(Color.LIGHT_GRAY);
-        capitalLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+    JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
+    buttonPanel.setBackground(Color.BLACK);
 
-        JLabel populationLabel = new JLabel("Population: ");
-        populationLabel.setFont(new Font("Monospaced", Font.PLAIN, 14));
-        populationLabel.setForeground(Color.LIGHT_GRAY);
-        populationLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+    Font buttonFont = new Font("Monospaced", Font.BOLD, 14);
 
-        topPanel.add(countryNameLabel);
-        topPanel.add(capitalLabel);
-        topPanel.add(populationLabel);
+    JButton mapButton = new JButton("Map");
+    JButton economyButton = new JButton("Economy");
+    JButton productionButton = new JButton("Production");
 
-        // Buttons panel
-        JPanel buttonPanel = new JPanel();
-        buttonPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 5));
-        buttonPanel.setBackground(Color.BLACK);
+    JButton[] buttons = {mapButton, economyButton, productionButton};
+    for (JButton btn : buttons) {
+        styleButton(btn, buttonFont);
+        buttonPanel.add(btn);
+    }
 
-        Font buttonFont = new Font("Monospaced", Font.BOLD, 14);
+    topPanel.add(buttonPanel);
+    frame.add(topPanel, BorderLayout.NORTH);
 
-        JButton mapButton = new JButton("Map");
-        JButton economyButton = new JButton("Economy");
-        JButton productionButton = new JButton("Production");
-
-        JButton[] buttons = {mapButton, economyButton, productionButton};
-        for (JButton btn : buttons) {
-            btn.setFont(buttonFont);
-            btn.setBackground(Color.DARK_GRAY);
-            btn.setForeground(Color.WHITE);
-            btn.setFocusPainted(false);
-            buttonPanel.add(btn);
+    JPanel infoPanel = new JPanel() {
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            g.setColor(new Color(255, 255, 255, 20));
+            for (int y = 0; y < getHeight(); y += 4) {
+                g.drawLine(0, y, getWidth(), y);
+            }
         }
+    };
+    infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
+    infoPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+    infoPanel.setPreferredSize(new Dimension(300, 1080));
+    infoPanel.setBackground(Color.BLACK);
 
-        topPanel.add(buttonPanel);
+    Font font = new Font("Monospaced", Font.PLAIN, 14);
 
-        frame.add(topPanel, BorderLayout.NORTH);
+    JTextField nameField = createBlinkingCaretField(15);
+    JTextField languageField = createBlinkingCaretField(15);
+    JTextField populationField = createBlinkingCaretField(15);
+    JTextField terrainField = createBlinkingCaretField(15);
+    JTextField tierField = createBlinkingCaretField(15);
+    JTextField cityTypeField = createBlinkingCaretField(15);
+    JTextField budget1Field = createBlinkingCaretField(15);
+    JTextField budget2Field = createBlinkingCaretField(15);
+    JButton updateButton = new JButton("Save Changes");
 
-        // Info panel setup
-        JPanel infoPanel = new JPanel();
-        infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
-        infoPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        infoPanel.setPreferredSize(new Dimension(300, 1080));
-        infoPanel.setBackground(Color.BLACK);
+    JTextField[] fields = {
+        nameField, languageField, populationField,
+        terrainField, tierField, cityTypeField, budget1Field, budget2Field
+    };
 
-        Font font = new Font("Monospaced", Font.PLAIN, 14);
+    for (JTextField field : fields) {
+        styleTextField(field, font);
+    }
 
-        JTextField nameField = new JTextField(15);
-        JTextField languageField = new JTextField(15);
-        JTextField populationField = new JTextField(15);
-        JTextField terrainField = new JTextField(15);
-        JTextField tierField = new JTextField(15);
-        JTextField cityTypeField = new JTextField(15);
-        JTextField budget1Field = new JTextField(15);
-        JTextField budget2Field = new JTextField(15);
-        JButton updateButton = new JButton("Save Changes");
-
-        JTextField[] fields = {
-            nameField, languageField, populationField,
-            terrainField, tierField, cityTypeField, budget1Field, budget2Field
-        };
-
-        for (JTextField field : fields) {
-            field.setFont(font);
-            field.setBackground(Color.BLACK);
-            field.setForeground(Color.WHITE);
-            field.setCaretColor(Color.WHITE);
-        }
-
-        updateButton.setFont(font);
-        updateButton.setBackground(Color.DARK_GRAY);
-        updateButton.setForeground(Color.WHITE);
+    styleButton(updateButton, font);
 
         addField(infoPanel, "Name:", nameField, font);
         addField(infoPanel, "Language:", languageField, font);
@@ -555,6 +550,51 @@ ProvinceParser.writeProvincesToCSV(provinceList, new File(dataDir, "Minaturia Pr
 
         svgCanvas.repaint();
     }
+
+    private void styleButton(JButton button, Font font) {
+    button.setFont(font);
+    button.setBackground(Color.BLACK);
+    button.setForeground(Color.WHITE);
+    button.setFocusPainted(false);
+    button.setBorder(BorderFactory.createLineBorder(Color.WHITE));
+}
+
+private void styleTextField(JTextField field, Font font) {
+    field.setFont(font);
+    field.setBackground(Color.BLACK);
+    field.setForeground(Color.WHITE);
+    field.setCaretColor(Color.WHITE);
+    field.setBorder(BorderFactory.createLineBorder(Color.WHITE));
+}
+
+private JTextField createBlinkingCaretField(int columns) {
+    JTextField field = new JTextField(columns);
+    Caret caret = new DefaultCaret() {
+        @Override
+        protected synchronized void damage(Rectangle r) {
+            if (r == null) return;
+            x = r.x;
+            y = r.y;
+            width = 1;
+            height = r.height;
+            repaint();
+        }
+    };
+    caret.setBlinkRate(500);
+    field.setCaret(caret);
+    return field;
+}
+
+private void showStyledDialog(String message) {
+    JTextArea textArea = new JTextArea(message);
+    textArea.setFont(new Font("Monospaced", Font.PLAIN, 14));
+    textArea.setBackground(Color.BLACK);
+    textArea.setForeground(Color.WHITE);
+    textArea.setEditable(false);
+    textArea.setBorder(BorderFactory.createLineBorder(Color.WHITE));
+    JOptionPane.showMessageDialog(null, textArea);
+}
+
 
     private void setVisibleLayerSafe(String layerIdToShow) {
         if (svgCanvas.getUpdateManager() != null) {
