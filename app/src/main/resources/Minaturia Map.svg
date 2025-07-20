@@ -1,4 +1,4 @@
-<?xml version="1.0" ?><svg xmlns="http://www.w3.org/2000/svg" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" viewBox="0 0 2000 1250">
+<?xml version="1.0" ?><svg xmlns="http://www.w3.org/2000/svg" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" width="2000" height="1250" viewBox="0 0 2000 1250">
   <defs>
     <pattern id="Chambria" x="0" y="0" width="4" height="4" patternUnits="userSpaceOnUse">
       <circle cx="2" cy="2" r="1" fill="white" />
@@ -335,19 +335,19 @@
   </g>
 <g id="Layer_production" inkscape:groupmode="layer" inkscape:label="Production" style="display:none">
   <!-- Moved down and to the right to avoid Swing overlays -->
-  <rect x="450" y="400" width="400" height="160" fill="black" stroke="white" stroke-width="2" rx="10" ry="10"/>
+  <rect id="inventoryBox" x="550" y="350" width="400" height="160" fill="black" stroke="white" stroke-width="2" rx="10" ry="10"/>
   
   <!-- White monospaced terminal-style text as a list -->
-  <text x="470" y="440" font-family="monospace" font-size="18" fill="white">
+  <text x="570" y="390" font-family="monospace" font-size="18" fill="white">
     Production Info:
   </text>
-  <text x="480" y="470" font-family="monospace" font-size="14" fill="white">
+  <text x="580" y="420" font-family="monospace" font-size="14" fill="white">
     - Food: 500 units
   </text>
-  <text x="480" y="495" font-family="monospace" font-size="14" fill="white">
+  <text x="580" y="445" font-family="monospace" font-size="14" fill="white">
     - Fuel: 300 units
   </text>
-  <text x="480" y="520" font-family="monospace" font-size="14" fill="white">
+  <text x="580" y="470" font-family="monospace" font-size="14" fill="white">
     - Water: 120 units
   </text>
 </g>

@@ -2,7 +2,6 @@ package org.whogames.digitalminaturia;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -30,9 +29,12 @@ import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JSlider;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
+import javax.swing.plaf.basic.BasicScrollBarUI;
 import javax.swing.text.Caret;
 import javax.swing.text.DefaultCaret;
 
@@ -123,19 +125,31 @@ public class SVGMapViewer {
 
     JLabel[] labels = {countryNameLabel, capitalLabel, populationLabel};
     for (JLabel label : labels) {
-        label.setFont(new Font("Monospaced", Font.BOLD, 18));
+        label.setFont(new Font("Monospaced", Font.BOLD, 16));
         label.setForeground(Color.WHITE);
-        label.setAlignmentX(Component.LEFT_ALIGNMENT);
+        label.setHorizontalAlignment(SwingConstants.LEFT);
     }
 
-    topPanel.add(countryNameLabel);
-    topPanel.add(capitalLabel);
-    topPanel.add(populationLabel);
+    topPanel.add(countryNameLabel, BorderLayout.WEST);
+    topPanel.add(capitalLabel, BorderLayout.WEST);
+    topPanel.add(populationLabel, BorderLayout.WEST);
+ 
+    JPanel buttonPanel = new JPanel() {
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            g.setColor(new Color(255, 255, 255, 20));
+            for (int y = 0; y < getHeight(); y += 4) {
+                g.drawLine(0, y, getWidth(), y);
+            }
+        }
+    };
 
-    JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
+    buttonPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 5));
+    buttonPanel.setPreferredSize(new Dimension(1920, 20));
     buttonPanel.setBackground(Color.BLACK);
 
-    Font buttonFont = new Font("Monospaced", Font.BOLD, 14);
+    Font buttonFont = new Font("Monospaced", Font.BOLD, 12);
 
     JButton mapButton = new JButton("Map");
     JButton economyButton = new JButton("Economy");
@@ -162,19 +176,19 @@ public class SVGMapViewer {
     };
     infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
     infoPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-    infoPanel.setPreferredSize(new Dimension(300, 1080));
+    infoPanel.setPreferredSize(new Dimension(300, 980));
     infoPanel.setBackground(Color.BLACK);
 
     Font font = new Font("Monospaced", Font.PLAIN, 14);
 
-    JTextField nameField = createBlinkingCaretField(15);
-    JTextField languageField = createBlinkingCaretField(15);
-    JTextField populationField = createBlinkingCaretField(15);
-    JTextField terrainField = createBlinkingCaretField(15);
-    JTextField tierField = createBlinkingCaretField(15);
-    JTextField cityTypeField = createBlinkingCaretField(15);
-    JTextField budget1Field = createBlinkingCaretField(15);
-    JTextField budget2Field = createBlinkingCaretField(15);
+    JTextField nameField = createBlinkingCaretField(10);
+    JTextField languageField = createBlinkingCaretField(10);
+    JTextField populationField = createBlinkingCaretField(10);
+    JTextField terrainField = createBlinkingCaretField(10);
+    JTextField tierField = createBlinkingCaretField(10);
+    JTextField cityTypeField = createBlinkingCaretField(10);
+    JTextField budget1Field = createBlinkingCaretField(10);
+    JTextField budget2Field = createBlinkingCaretField(10);
     JButton updateButton = new JButton("Save Changes");
 
     JTextField[] fields = {
@@ -196,16 +210,21 @@ public class SVGMapViewer {
         addField(infoPanel, "City Type:", cityTypeField, font);
         addField(infoPanel, "Food Production:", budget1Field, font);
         addField(infoPanel, "Fuel Production:", budget2Field, font);
-        infoPanel.add(Box.createRigidArea(new Dimension(0, 10)));
+        infoPanel.add(Box.createRigidArea(new Dimension(0, 5)));
         infoPanel.add(updateButton);
 
         // Setup layered pane for svg and overlays
+        JPanel svgWrapper = new JPanel(null); // null layout to control exact positioning
+        svgWrapper.setPreferredSize(new Dimension(2000, 1250)); // your actual SVG size
+        svgWrapper.add(svgCanvas);
+        svgWrapper.setBackground(Color.BLACK);
+        svgWrapper.setOpaque(true);
+        svgCanvas.setBounds(0, 0, 2000, 1250);
+        svgWrapper.setBounds(0, 0, 2000, 1250);  // Add this!
         JLayeredPane layeredPane = new JLayeredPane();
         // Set preferred size to your SVG native size or a default
-        layeredPane.setPreferredSize(new Dimension(1000, 625));
-
-        svgCanvas.setBounds(0, 0, 1000, 625);
-        layeredPane.add(svgCanvas, JLayeredPane.DEFAULT_LAYER);
+        layeredPane.setPreferredSize(new Dimension(2000, 1250));
+        layeredPane.add(svgWrapper, JLayeredPane.DEFAULT_LAYER);
 
         Font consoleFont = new Font("Monospaced", Font.PLAIN, 14);
 
@@ -236,6 +255,69 @@ public class SVGMapViewer {
 
         svgCanvas.setDocumentState(JSVGCanvas.ALWAYS_DYNAMIC);
         svgCanvas.setBackground(Color.BLACK);
+
+        JScrollPane scrollPane = new JScrollPane(layeredPane); 
+        scrollPane.setViewportView(layeredPane);
+ 
+        scrollPane.setBackground(Color.BLACK);
+        scrollPane.getVerticalScrollBar().setUI(new BasicScrollBarUI() {
+    @Override
+    protected void configureScrollBarColors() {
+        this.thumbColor = Color.WHITE;
+        this.trackColor = Color.BLACK;
+    }
+
+    @Override
+    protected JButton createDecreaseButton(int orientation) {
+        return createInvisibleButton();
+    }
+
+    @Override
+    protected JButton createIncreaseButton(int orientation) {
+        return createInvisibleButton();
+    }
+
+    private JButton createInvisibleButton() {
+        JButton button = new JButton();
+        button.setPreferredSize(new Dimension(0, 0));
+        button.setMinimumSize(new Dimension(0, 0));
+        button.setMaximumSize(new Dimension(0, 0));
+        return button;
+    }
+});
+
+scrollPane.getHorizontalScrollBar().setUI(new BasicScrollBarUI() {
+    @Override
+    protected void configureScrollBarColors() {
+        this.thumbColor = Color.WHITE;
+        this.trackColor = Color.BLACK;
+    }
+
+    @Override
+    protected JButton createDecreaseButton(int orientation) {
+        return createInvisibleButton();
+    }
+
+    @Override
+    protected JButton createIncreaseButton(int orientation) {
+        return createInvisibleButton();
+    }
+
+    private JButton createInvisibleButton() {
+        JButton button = new JButton();
+        button.setPreferredSize(new Dimension(0, 0));
+        button.setMinimumSize(new Dimension(0, 0));
+        button.setMaximumSize(new Dimension(0, 0));
+        return button;
+    }
+});
+
+scrollPane.getVerticalScrollBar().setPreferredSize(new Dimension(8, 0));
+scrollPane.getHorizontalScrollBar().setPreferredSize(new Dimension(0, 8));
+scrollPane.setPreferredSize(new Dimension(2000, 1250));
+
+
+      
 
         File svgFile = new File(dataDir, "Minaturia Map.svg");
         String parser = XMLResourceDescriptor.getXMLParserClassName();
@@ -400,7 +482,7 @@ ProvinceParser.writeProvincesToCSV(provinceList, new File(dataDir, "Minaturia Pr
         });
 
         frame.add(infoPanel, BorderLayout.WEST);
-        frame.add(layeredPane, BorderLayout.CENTER);
+        frame.add(scrollPane, BorderLayout.CENTER);
 
         // *** Make frame resizable ***
         frame.setResizable(true);
@@ -409,10 +491,8 @@ ProvinceParser.writeProvincesToCSV(provinceList, new File(dataDir, "Minaturia Pr
         layeredPane.addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
-                Dimension size = layeredPane.getSize();
 
-                // Resize svgCanvas to fill layeredPane
-                svgCanvas.setBounds(0, 0, size.width, size.height);
+                Dimension size = scrollPane.getViewport().getExtentSize();
 
                 // Position overlay controls relative to panel size
                 int x = (int) (size.width * 0.05);
@@ -426,12 +506,16 @@ ProvinceParser.writeProvincesToCSV(provinceList, new File(dataDir, "Minaturia Pr
                 resourceSelect.setBounds(x, y, width, height);
                 fuelSlider.setBounds(x, y + spacing, width + 70, height);
                 foodInput.setBounds(x, y + spacing * 2, width, height);
+                System.out.println("layeredPane preferred size: " + layeredPane.getPreferredSize());
+                System.out.println("scroll view size: " + scrollPane.getViewport().getViewSize());
             }
         });
 
         frame.pack();
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
+        System.out.println("svgWrapper size: " + svgWrapper.getSize());
+
     }
 
     private void updateInventoryForCountry(String country) {
@@ -507,8 +591,8 @@ ProvinceParser.writeProvincesToCSV(provinceList, new File(dataDir, "Minaturia Pr
         }
 
         // Add updated production text
-        int startX = 470;
-        int startY = 440;
+        int startX = 580;
+        int startY = 420;
         int lineHeight = 25;
 
         Element title = svgDoc.createElementNS("http://www.w3.org/2000/svg", "text");
@@ -546,12 +630,15 @@ ProvinceParser.writeProvincesToCSV(provinceList, new File(dataDir, "Minaturia Pr
             textLine.setTextContent(line);
             layer.appendChild(textLine);
             startY += lineHeight;
+            if (startY > ((Integer.parseInt(svgDoc.getElementById("inventoryBox").getAttribute("height")) + Integer.parseInt(svgDoc.getElementById("inventoryBox").getAttribute("y")))-15)){
+                svgDoc.getElementById("inventoryBox").setAttribute("height", (Integer.parseInt(svgDoc.getElementById("inventoryBox").getAttribute("height"))+40) + "");
+            }
         }
 
         svgCanvas.repaint();
     }
 
-    private void styleButton(JButton button, Font font) {
+private void styleButton(JButton button, Font font) {
     button.setFont(font);
     button.setBackground(Color.BLACK);
     button.setForeground(Color.WHITE);
@@ -594,7 +681,6 @@ private void showStyledDialog(String message) {
     textArea.setBorder(BorderFactory.createLineBorder(Color.WHITE));
     JOptionPane.showMessageDialog(null, textArea);
 }
-
 
     private void setVisibleLayerSafe(String layerIdToShow) {
         if (svgCanvas.getUpdateManager() != null) {
