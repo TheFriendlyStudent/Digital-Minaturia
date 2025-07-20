@@ -9,14 +9,14 @@ import java.awt.Font;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.io.InputStream;
-import java.io.FileOutputStream;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -207,9 +207,9 @@ ProvinceParser.parseInventory(new FileReader(invFile), country, entityMap);
         // Setup layered pane for svg and overlays
         JLayeredPane layeredPane = new JLayeredPane();
         // Set preferred size to your SVG native size or a default
-        layeredPane.setPreferredSize(new Dimension(2000, 1250));
+        layeredPane.setPreferredSize(new Dimension(1000, 625));
 
-        svgCanvas.setBounds(0, 0, 2000, 1250);
+        svgCanvas.setBounds(0, 0, 1000, 625);
         layeredPane.add(svgCanvas, JLayeredPane.DEFAULT_LAYER);
 
         Font consoleFont = new Font("Monospaced", Font.PLAIN, 14);
@@ -247,8 +247,28 @@ ProvinceParser.parseInventory(new FileReader(invFile), country, entityMap);
         SAXSVGDocumentFactory factory = new SAXSVGDocumentFactory(parser);
         Document parsedDoc = factory.createDocument(svgFile.toURI().toString());
         svgCanvas.setDocument(parsedDoc);
-
         // Initially show map
+        Document doc = svgCanvas.getSVGDocument();
+        Element layerMap = doc.getElementById("Layer_map");
+
+        if (layerMap == null) {
+        System.out.println("Layer_map NOT found!");
+            return;
+        }
+
+        NodeList children = layerMap.getElementsByTagName("*");
+        for (int i = 0; i < children.getLength(); i++) {
+            Element el = (Element) children.item(i);
+            String id = el.getAttribute("id");
+            Province province = provinceList.get(Integer.parseInt(id) - 1);
+            String encodedID = province.getCountry().replace("'", "");  // escape apostrophes
+            encodedID = encodedID.replaceAll("\\s+", "-"); 
+            el.setAttribute("style", "fill: url(#" + encodedID + ");");
+
+            System.out.println("fill:(#" + province.getCountry() + ");stroke:white;stroke-width:1;");
+
+        }
+ 
         setVisibleLayerSafe("Layer_map");
 
         // Button listeners
@@ -305,7 +325,9 @@ ProvinceParser.parseInventory(new FileReader(invFile), country, entityMap);
                                 }
 
                                 if (selectedElement == el) {
-                                    selectedElement.setAttribute("style", "fill:black;stroke:white;stroke-width:1;");
+                                    String encodedID = currentProvince.getCountry().replace("'", "");  // escape apostrophes
+                                    encodedID = encodedID.replaceAll("\\s+", "-");  
+                                    el.setAttribute("style", "fill: url(#" + encodedID + ");");
                                     selectedElement = null;
                                     currentProvince = null;
                                     currentProvinceIndex = -1;
@@ -346,11 +368,12 @@ ProvinceParser.parseInventory(new FileReader(invFile), country, entityMap);
                                 }
 
                                 if (selectedElement != null && selectedElement != el) {
-                                    selectedElement.setAttribute("style", "fill:black;stroke:white;stroke-width:1;");
-
+                                    String encodedID = provinceList.get(Integer.parseInt(selectedElement.getAttribute("id"))-1).getCountry().replace("'", "");  // escape apostrophes
+                                    encodedID = encodedID.replaceAll("\\s+", "-");  
+                                    selectedElement.setAttribute("style", "fill: url(#" + encodedID + ");");
                                 }
 
-                                el.setAttribute("style", "fill:white;stroke:black;stroke-width:2;");
+                                el.setAttribute("style", "fill:white;stroke:white;stroke-width:1;");
                                 selectedElement = el;
                             }, false);
                         }
