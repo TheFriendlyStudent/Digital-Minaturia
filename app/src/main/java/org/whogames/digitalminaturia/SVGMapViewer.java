@@ -70,7 +70,7 @@ public class SVGMapViewer {
     private static ArrayList<Entity> technologyList = new ArrayList<>();
     private static HashMap<String, Entity> entityMap = new HashMap<>();
     private final File dataDir = new File(System.getProperty("user.home"), "MinaturiaData");
-    private final String[] SvgFiles = new String[]{"Map Layer", "Economy Layer", "Production Layer", "Research Layer"};
+    private final String[] SvgFiles = new String[]{"Map Layer", "Economy Layer", "Production Layer", "Research Layer", "Squad Design Layer"};
 
     private static HashMap<String, JSVGCanvas> canvasMap = new HashMap<>();
     private static HashMap<String, JLayeredPane> layeredPaneMap = new HashMap<>();  
@@ -103,6 +103,7 @@ public class SVGMapViewer {
         copyResourceToFile("Production Layer.svg", new File(dataDir, "Production Layer.svg"));
         copyResourceToFile("Research Layer.svg", new File(dataDir, "Research Layer.svg"));
         copyResourceToFile("Economy Layer.svg", new File(dataDir, "Economy Layer.svg"));
+        copyResourceToFile("Squad Design Layer.svg", new File(dataDir, "Squad Design Layer.svg"));
     } catch (IOException e) {
         e.printStackTrace();
         showStyledDialog("Failed to load game data files: " + e.getMessage());
@@ -186,10 +187,10 @@ scrollPane.getHorizontalScrollBar().setUI(new BasicScrollBarUI() {
     }
 });
 
-scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
-scrollPane.getVerticalScrollBar().setPreferredSize(new Dimension(8, 0));
-scrollPane.getHorizontalScrollBar().setPreferredSize(new Dimension(0, 8));
+    scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+    scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+    scrollPane.getVerticalScrollBar().setPreferredSize(new Dimension(8, 0));
+    scrollPane.getHorizontalScrollBar().setPreferredSize(new Dimension(0, 8));
 
     JPanel topPanel = new JPanel() {
         @Override
@@ -241,8 +242,9 @@ scrollPane.getHorizontalScrollBar().setPreferredSize(new Dimension(0, 8));
     JButton economyButton = new JButton("Economy");
     JButton productionButton = new JButton("Production");
     JButton researchButton = new JButton("Research");
+    JButton squadButton = new JButton("Squad Design");
 
-    JButton[] buttons = {mapButton, economyButton, productionButton, researchButton};
+    JButton[] buttons = {mapButton, economyButton, productionButton, researchButton, squadButton};
     for (JButton btn : buttons) {
         styleButton(btn, buttonFont);
         buttonPanel.add(btn);
@@ -387,20 +389,18 @@ scrollPane.getHorizontalScrollBar().setPreferredSize(new Dimension(0, 8));
             CardLayout c = (CardLayout)cards.getLayout();
             c.show(cards, "Research Layer");
         });
+        squadButton.addActionListener(e -> {
+            CardLayout c = (CardLayout)cards.getLayout();
+            c.show(cards, "Squad Design Layer");
+        });
 
         foodInput.addActionListener(e -> {
             if (currentProvince == null || currentProvince.getCountry() == null) {
                 JOptionPane.showMessageDialog(canvasMap.get("Map Layer"), "No province selected.");
             } else {
-                updateInventoryForCountry(currentProvince.getCountry());
-                try {
-                    ProvinceParser.writeInventoryToCSV(getCountryByName(currentProvince.getCountry()), new File(dataDir, currentProvince.getCountry() + " Inventory.csv").getAbsolutePath());
-
-                } catch (IOException e1) {
-                    // TODO Auto-generated catch block
-                    e1.printStackTrace();
-                }
+                ProvinceParser.scheduleCSVWrite(currentProvince.getCountry()); // TODO Auto-generated catch block
                 updateProductionLayer(getCountryByName(currentProvince.getCountry()));
+                updateInventoryForCountry(currentProvince.getCountry());
             }
         });
 
@@ -794,7 +794,7 @@ private void setColorsRecursive(Container container, Color bg, Color fg) {
         populationLabel.setText("Population: ");
     }
 
-    private Country getCountryByName(String name) {
+    public static Country getCountryByName(String name) {
         for (Country country : countryList) {
             if (country.getName().equalsIgnoreCase(name.trim())) {
                 return country;

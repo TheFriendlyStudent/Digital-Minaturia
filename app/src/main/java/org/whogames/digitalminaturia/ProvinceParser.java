@@ -10,9 +10,40 @@ import java.io.Reader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class ProvinceParser {
+
+    private static final File dataDir = new File(System.getProperty("user.home"), "MinaturiaData");
+    private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2); 
+
+    private static final Map<String, Object> fileLocks = new ConcurrentHashMap<>();
+
+    static {
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            scheduler.shutdown();
+            try {
+                if (!scheduler.awaitTermination(5, TimeUnit.SECONDS)) {
+                    scheduler.shutdownNow();
+                }
+            } catch (InterruptedException e) {
+                scheduler.shutdownNow();
+            }
+        }));
+
+        scheduler.scheduleAtFixedRate(() -> {
+        try {
+            checkPendingCSVWrites();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }, 0, 1, TimeUnit.SECONDS);
+    }
 
     public static ArrayList<Province> parseProvinces(Reader reader) throws IOException {
         ArrayList<Province> provinces = new ArrayList<>();
@@ -193,47 +224,51 @@ public class ProvinceParser {
     }
 
     public static void writeInventoryToCSV(Country country, String filePath) throws IOException {
-        File file = new File(filePath);
-        System.out.println("Reading and updating: " + file.getAbsolutePath());
+        Object lock = fileLocks.computeIfAbsent(filePath, k -> new Object());
 
-        Map<String, Integer> currentInventory = new LinkedHashMap<>();
+        synchronized (lock) {
+            File file = new File(filePath);
+            System.out.println("Reading and updating: " + file.getAbsolutePath());
 
-        // Step 1: Read existing data
-        if (file.exists()) {
-            try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    String[] parts = line.split(",", -1);
-                    if (parts.length >= 2) {
-                        String name = parts[0].trim();
-                        int quantity;
-                        try {
-                            quantity = Integer.parseInt(parts[1].trim());
-                        } catch (NumberFormatException e) {
-                            quantity = 0;
+            Map<String, Integer> currentInventory = new LinkedHashMap<>();
+
+            // Step 1: Read existing data
+            if (file.exists()) {
+                try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        String[] parts = line.split(",", -1);
+                        if (parts.length >= 2) {
+                            String name = parts[0].trim();
+                            int quantity;
+                            try {
+                                quantity = Integer.parseInt(parts[1].trim());
+                            } catch (NumberFormatException e) {
+                                quantity = 0;
+                            }
+                            currentInventory.put(name, quantity);
                         }
-                        currentInventory.put(name, quantity);
                     }
                 }
             }
-        }
 
-        // Step 2: Update inventory with the new country data
-        System.out.println(country.getInventory().toString());
-        for (Map.Entry<Entity, Integer> entry : country.getInventory().entrySet()) {
-            String itemName = entry.getKey().getName();
-            int newQuantity = entry.getValue();
-            currentInventory.put(itemName, newQuantity); // replace or add
-        }
-
-        // Step 3: Write the updated data back to the CSV
-        try (PrintWriter writer = new PrintWriter(new FileWriter(file))) {
-            for (Map.Entry<String, Integer> entry : currentInventory.entrySet()) {
-                writer.printf("%s,%d%n", entry.getKey(), entry.getValue());
+            // Step 2: Update inventory with the new country data
+            System.out.println(country.getInventory().toString());
+            for (Map.Entry<Entity, Integer> entry : country.getInventory().entrySet()) {
+                String itemName = entry.getKey().getName();
+                int newQuantity = entry.getValue();
+                currentInventory.put(itemName, newQuantity); // replace or add
             }
-        }
 
-        System.out.println("CSV successfully updated with inventory changes.");
+            // Step 3: Write the updated data back to the CSV
+            try (PrintWriter writer = new PrintWriter(new FileWriter(file))) {
+                for (Map.Entry<String, Integer> entry : currentInventory.entrySet()) {
+                    writer.printf("%s,%d%n", entry.getKey(), entry.getValue());
+                }
+            }
+
+            System.out.println("CSV successfully updated with inventory changes.");
+        }
     }
 
     public static void parseInventory(Reader reader, Country country, HashMap<String, Entity> entityMap) throws IOException {
@@ -268,4 +303,69 @@ public class ProvinceParser {
             country.getInventory().put(A, quantity);
         }
     }
+
+public static void scheduleCSVWrite(String countryName) {
+        long delayMillis = 60 * 1000; // 1 minute
+        long scheduledTime = System.currentTimeMillis() + delayMillis;
+
+try (FileWriter writer = new FileWriter(new File(dataDir, countryName + "_write_time.txt"), true)) { // append=true
+    writer.write(Long.toString(scheduledTime));
+    System.out.println(scheduledTime);
+    writer.write(System.lineSeparator());
+} catch (IOException e) {
+    e.printStackTrace();
+}
+
+    }
+
+public static void checkPendingCSVWrites() {
+    File[] files = dataDir.listFiles((dir, name) -> name.endsWith("_write_time.txt"));
+    if (files == null) return;
+
+    for (File file : files) {
+        String countryName = file.getName().replace("_write_time.txt", "");
+        Country country = SVGMapViewer.getCountryByName(countryName);
+        if (country == null) {
+            System.err.println("Country not found: " + countryName);
+            continue;
+        }
+
+        List<Long> scheduledTimes = new ArrayList<>();
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                try {
+                    scheduledTimes.add(Long.parseLong(line.trim()));
+                } catch (NumberFormatException e) {
+                    System.err.println("Invalid timestamp in " + file.getName() + ": " + line);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            continue;
+        }
+
+        for (Long scheduledTime : scheduledTimes) {
+            long delay = scheduledTime - System.currentTimeMillis();
+            Runnable task = () -> {
+                try {
+                    writeInventoryToCSV(country, new File(dataDir, countryName + " Inventory.csv").getAbsolutePath());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            };
+
+            if (delay <= 0) {
+                scheduler.execute(task); // run immediately
+            } else {
+                scheduler.schedule(task, delay, TimeUnit.MILLISECONDS); // delay execution
+            }
+        }
+
+        file.delete(); // Remove write_time file after processing all entries
+    }
+}
+
+
+
 }
