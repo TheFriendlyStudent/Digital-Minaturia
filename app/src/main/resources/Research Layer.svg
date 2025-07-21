@@ -1,19 +1,19 @@
-<?xml version="1.0" ?><svg xmlns="http://www.w3.org/2000/svg" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" width="2000" height="1250" viewBox="0 0 2000 1250">
-<g id="Layer_research" inkscape:groupmode="layer" inkscape:label="Research" style="display:none">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" width="2000" height="1250" viewBox="0 0 2000 1250">
+<g id="Layer_research" inkscape:groupmode="layer" inkscape:label="Research">
   <!-- Moved down and to the right to avoid Swing overlays -->
-  <rect id="inventoryBox" x="550" y="350" width="400" height="160" fill="black" stroke="white" stroke-width="2" rx="10" ry="10"/>
+  <rect id="inventoryBox" x="690" y="150" width="400" height="160" fill="black" stroke="white" stroke-width="2" rx="10" ry="10"/>
   
   <!-- White monospaced terminal-style text as a list -->
-  <text x="570" y="390" font-family="monospace" font-size="18" fill="white">
+  <text x="670" y="190" font-family="monospace" font-size="18" fill="white">
     Production Info:
   </text>
-  <text x="580" y="420" font-family="monospace" font-size="14" fill="white">
+  <text x="700" y="220" font-family="monospace" font-size="14" fill="white">
     - Food: 500 units
   </text>
-  <text x="580" y="445" font-family="monospace" font-size="14" fill="white">
+  <text x="700" y="245" font-family="monospace" font-size="14" fill="white">
     - Fuel: 300 units
   </text>
-  <text x="580" y="470" font-family="monospace" font-size="14" fill="white">
+  <text x="700" y="270" font-family="monospace" font-size="14" fill="white">
     - Water: 120 units
   </text>
 </g>
