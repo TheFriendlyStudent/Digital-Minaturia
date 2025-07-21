@@ -3,6 +3,8 @@ package org.whogames.digitalminaturia;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Color;
+import java.awt.Component;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -30,6 +32,7 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
@@ -77,6 +80,7 @@ public class SVGMapViewer {
     private JButton foodInput;
     private JSlider fuelSlider;
     private JComboBox<String> resourceSelect;
+    private JComboBox<String> techSelect;
 
     private double zoomFactor = 1.0;
     private final double zoomStep = 0.1;  // zoom increment
@@ -124,6 +128,68 @@ public class SVGMapViewer {
     frame.setLayout(new BorderLayout());
      // Setup layered pane for svg and overlays
     JPanel cards = new JPanel(new CardLayout());
+
+        JScrollPane scrollPane = new JScrollPane(cards); 
+        scrollPane.setViewportView(cards);
+        scrollPane.setPreferredSize(new Dimension(1000, 625));
+ 
+        scrollPane.setBackground(Color.BLACK);
+        scrollPane.getVerticalScrollBar().setUI(new BasicScrollBarUI() {
+    @Override
+    protected void configureScrollBarColors() {
+        this.thumbColor = Color.WHITE;
+        this.trackColor = Color.BLACK;
+    }
+
+    @Override
+    protected JButton createDecreaseButton(int orientation) {
+        return createInvisibleButton();
+    }
+
+    @Override
+    protected JButton createIncreaseButton(int orientation) {
+        return createInvisibleButton();
+    }
+
+    private JButton createInvisibleButton() {
+        JButton button = new JButton();
+        button.setPreferredSize(new Dimension(0, 0));
+        button.setMinimumSize(new Dimension(0, 0));
+        button.setMaximumSize(new Dimension(0, 0));
+        return button;
+    }
+});
+
+scrollPane.getHorizontalScrollBar().setUI(new BasicScrollBarUI() {
+    @Override
+    protected void configureScrollBarColors() {
+        this.thumbColor = Color.WHITE;
+        this.trackColor = Color.BLACK;
+    }
+
+    @Override
+    protected JButton createDecreaseButton(int orientation) {
+        return createInvisibleButton();
+    }
+
+    @Override
+    protected JButton createIncreaseButton(int orientation) {
+        return createInvisibleButton();
+    }
+
+    private JButton createInvisibleButton() {
+        JButton button = new JButton();
+        button.setPreferredSize(new Dimension(0, 0));
+        button.setMinimumSize(new Dimension(0, 0));
+        button.setMaximumSize(new Dimension(0, 0));
+        return button;
+    }
+});
+
+scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+scrollPane.getVerticalScrollBar().setPreferredSize(new Dimension(8, 0));
+scrollPane.getHorizontalScrollBar().setPreferredSize(new Dimension(0, 8));
 
     JPanel topPanel = new JPanel() {
         @Override
@@ -234,89 +300,39 @@ public class SVGMapViewer {
     infoPanel.add(Box.createRigidArea(new Dimension(0, 5)));
     infoPanel.add(updateButton);
 
-        Font consoleFont = new Font("Monospaced", Font.PLAIN, 14);
+    Font consoleFont = new Font("Monospaced", Font.PLAIN, 14);
 
-        foodInput = new JButton("Order");
-        foodInput.setBackground(Color.BLACK);
-        foodInput.setForeground(Color.WHITE);
-        foodInput.setFont(consoleFont);
-        foodInput.setBorder(BorderFactory.createLineBorder(Color.WHITE));
+    foodInput = new JButton("Order");
+    foodInput.setBackground(Color.BLACK);
+    foodInput.setForeground(Color.WHITE);
+    foodInput.setFont(consoleFont);
+    foodInput.setBorder(BorderFactory.createLineBorder(Color.WHITE));
 
-        fuelSlider = new JSlider(0, 1000, 300);
-        fuelSlider.setBackground(Color.BLACK);
-        fuelSlider.setForeground(Color.WHITE);
-        fuelSlider.setFont(consoleFont);
-        fuelSlider.setPaintTicks(true);
-        fuelSlider.setPaintLabels(true);
-        fuelSlider.setMajorTickSpacing(250);
-        fuelSlider.setMinorTickSpacing(50);
+    fuelSlider = new JSlider(0, 1000, 300);
+    fuelSlider.setBackground(Color.BLACK);
+    fuelSlider.setForeground(Color.WHITE);
+    fuelSlider.setFont(consoleFont);
+    fuelSlider.setPaintTicks(true);
+    fuelSlider.setPaintLabels(true);
+    fuelSlider.setMajorTickSpacing(250);
+    fuelSlider.setMinorTickSpacing(50);
 
-        resourceSelect = new JComboBox<>(new String[]{"Food", "Fuel", "Iron", "Steel"});
-        resourceSelect.setBackground(Color.BLACK);
-        resourceSelect.setForeground(Color.WHITE);
-        resourceSelect.setFont(consoleFont);
-        resourceSelect.setBorder(BorderFactory.createLineBorder(Color.WHITE));
+    resourceSelect = new JComboBox<>(new String[]{"Food", "Fuel", "Iron", "Steel"});
+    resourceSelect.setBackground(Color.BLACK);
+    resourceSelect.setForeground(Color.WHITE);
+    resourceSelect.setFont(consoleFont);
+    resourceSelect.setBorder(BorderFactory.createLineBorder(Color.WHITE));
 
-        JScrollPane scrollPane = new JScrollPane(cards); 
-        scrollPane.setViewportView(cards);
-        scrollPane.setPreferredSize(new Dimension(1000, 625));
- 
-        scrollPane.setBackground(Color.BLACK);
-        scrollPane.getVerticalScrollBar().setUI(new BasicScrollBarUI() {
-    @Override
-    protected void configureScrollBarColors() {
-        this.thumbColor = Color.WHITE;
-        this.trackColor = Color.BLACK;
-    }
+    String[] technologies = new String[Ammunition.getTypes().length + Vehicle.getTypes().length + Firearm.getTypes().length];
+    System.arraycopy(Ammunition.getTypes(), 0, technologies, 0, Ammunition.getTypes().length);
+    System.arraycopy(Firearm.getTypes(), 0, technologies, (Ammunition.getTypes().length), Firearm.getTypes().length);
+    System.arraycopy(Vehicle.getTypes(), 0, technologies, (Ammunition.getTypes().length)+(Firearm.getTypes().length), Vehicle.getTypes().length);
 
-    @Override
-    protected JButton createDecreaseButton(int orientation) {
-        return createInvisibleButton();
-    }
-
-    @Override
-    protected JButton createIncreaseButton(int orientation) {
-        return createInvisibleButton();
-    }
-
-    private JButton createInvisibleButton() {
-        JButton button = new JButton();
-        button.setPreferredSize(new Dimension(0, 0));
-        button.setMinimumSize(new Dimension(0, 0));
-        button.setMaximumSize(new Dimension(0, 0));
-        return button;
-    }
-});
-
-scrollPane.getHorizontalScrollBar().setUI(new BasicScrollBarUI() {
-    @Override
-    protected void configureScrollBarColors() {
-        this.thumbColor = Color.WHITE;
-        this.trackColor = Color.BLACK;
-    }
-
-    @Override
-    protected JButton createDecreaseButton(int orientation) {
-        return createInvisibleButton();
-    }
-
-    @Override
-    protected JButton createIncreaseButton(int orientation) {
-        return createInvisibleButton();
-    }
-
-    private JButton createInvisibleButton() {
-        JButton button = new JButton();
-        button.setPreferredSize(new Dimension(0, 0));
-        button.setMinimumSize(new Dimension(0, 0));
-        button.setMaximumSize(new Dimension(0, 0));
-        return button;
-    }
-});
-scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
-scrollPane.getVerticalScrollBar().setPreferredSize(new Dimension(8, 0));
-scrollPane.getHorizontalScrollBar().setPreferredSize(new Dimension(0, 8));
+    techSelect = new JComboBox<>(technologies);
+    techSelect.setBackground(Color.BLACK);
+    techSelect.setForeground(Color.WHITE);
+    techSelect.setFont(consoleFont);
+    techSelect.setBorder(BorderFactory.createLineBorder(Color.WHITE));
 
     cards.setPreferredSize(new Dimension(2000, 1250));
     for (String svgFi : SvgFiles){
@@ -353,28 +369,7 @@ scrollPane.getHorizontalScrollBar().setPreferredSize(new Dimension(0, 8));
     layeredPaneMap.get("Production Layer").add(resourceSelect, JLayeredPane.PALETTE_LAYER);
     layeredPaneMap.get("Production Layer").add(foodInput, JLayeredPane.PALETTE_LAYER);
 
-        Document doc = canvasMap.get("Map Layer").getSVGDocument();
-        Element layerMap = doc.getElementById("Layer_map");
-
-        if (layerMap == null) {
-        System.out.println("Layer_map NOT found!");
-            return;
-        }
-
-        NodeList children = layerMap.getElementsByTagName("*");
-        for (int i = 0; i < children.getLength(); i++) {
-            Element el = (Element) children.item(i);
-            String id = el.getAttribute("id");
-            Province province = provinceList.get(Integer.parseInt(id) - 1);
-            String encodedID = province.getCountry().replace("'", "");  // escape apostrophes
-            encodedID = encodedID.replaceAll("\\s+", "-"); 
-            el.setAttribute("style", "fill: url(#" + encodedID + ");");
-
-            System.out.println("fill:(#" + province.getCountry() + ");stroke:white;stroke-width:1;");
-
-        }
-
-        canvasMap.get("Map Layer").repaint();
+    layeredPaneMap.get("Research Layer").add(techSelect, JLayeredPane.PALETTE_LAYER);
 
         mapButton.addActionListener(e -> {
             CardLayout c = (CardLayout)cards.getLayout();
@@ -435,11 +430,8 @@ scrollPane.getHorizontalScrollBar().setPreferredSize(new Dimension(0, 8));
                             continue;
                         }
 
-                        Province province = provinceList.get(provinceId - 1);
-                        if (currentProvince != null) {
-                            String encID = currentProvince.getCountry().replace("'", "").replaceAll("\\s+", "-");
-                            el.setAttribute("style", "fill: url(#" + encID + ");");
-                        }
+                        String encID = provinceList.get(provinceId - 1).getCountry().replace("'", "").replaceAll("\\s+", "-");
+                        el.setAttribute("style", "fill: url(#" + encID + ");");
 
                         // Enable pointer events
                         el.setAttribute("pointer-events", "visiblePainted");
@@ -457,9 +449,9 @@ scrollPane.getHorizontalScrollBar().setPreferredSize(new Dimension(0, 8));
                                 }
 
                                 if (selectedElement == el) {
-                                    String encID = currentProvince.getCountry().replace("'", "");  // escape apostrophes
-                                    encID = encID.replaceAll("\\s+", "-");  
-                                    el.setAttribute("style", "fill: url(#" + encID + ");");
+                                    String encoID = currentProvince.getCountry().replace("'", "");  // escape apostrophes
+                                    encoID = encoID.replaceAll("\\s+", "-");  
+                                    el.setAttribute("style", "fill: url(#" + encoID + ");");
                                     selectedElement = null;
                                     currentProvince = null;
                                     currentProvinceIndex = -1;
@@ -500,9 +492,9 @@ scrollPane.getHorizontalScrollBar().setPreferredSize(new Dimension(0, 8));
                                 }
 
                                 if (selectedElement != null && selectedElement != el) {
-                                    String encID = provinceList.get(Integer.parseInt(selectedElement.getAttribute("id"))-1).getCountry().replace("'", "");  // escape apostrophes
-                                    encID = encID.replaceAll("\\s+", "-");  
-                                    selectedElement.setAttribute("style", "fill: url(#" + encID + ");");
+                                    String enceID = provinceList.get(Integer.parseInt(selectedElement.getAttribute("id"))-1).getCountry().replace("'", "");  // escape apostrophes
+                                    enceID = enceID.replaceAll("\\s+", "-");  
+                                    selectedElement.setAttribute("style", "fill: url(#" + enceID + ");");
                                 }
 
                                 el.setAttribute("style", "fill:white;stroke:white;stroke-width:1;");
@@ -527,7 +519,7 @@ scrollPane.getHorizontalScrollBar().setPreferredSize(new Dimension(0, 8));
                     currentProvince.setBudget1(Long.parseLong(budget1Field.getText()));
                     currentProvince.setBudget2(Long.parseLong(budget2Field.getText()));
 
-ProvinceParser.writeProvincesToCSV(provinceList, new File(dataDir, "Minaturia Provinces.csv").getAbsolutePath());
+                ProvinceParser.writeProvincesToCSV(provinceList, new File(dataDir, "Minaturia Provinces.csv").getAbsolutePath());
 
                     JOptionPane.showMessageDialog(frame, "Changes saved.");
                 } catch (Exception ex) {
@@ -564,6 +556,7 @@ ProvinceParser.writeProvincesToCSV(provinceList, new File(dataDir, "Minaturia Pr
                 int xSpacing = width + 30;
 
                 resourceSelect.setBounds(x, y, width, height);
+                techSelect.setBounds(x, y, width, height);
                 fuelSlider.setBounds(x + xSpacing, y, width + 70, sliderHeight);
                 foodInput.setBounds(x, y + spacing, width, height);
                 System.out.println("layeredPane preferred size: " + cards.getPreferredSize());
@@ -746,8 +739,33 @@ private void showStyledDialog(String message) {
     textArea.setForeground(Color.WHITE);
     textArea.setEditable(false);
     textArea.setBorder(BorderFactory.createLineBorder(Color.WHITE));
-    JOptionPane.showMessageDialog(null, textArea);
+    
+    // Create the JOptionPane with the text area as message component
+    JOptionPane pane = new JOptionPane(textArea, JOptionPane.INFORMATION_MESSAGE);
+    
+    // Create a dialog from the JOptionPane
+    JDialog dialog = pane.createDialog(message);
+    
+    // Set black background for dialog content pane
+    dialog.getContentPane().setBackground(Color.BLACK);
+    
+    // Recursively set background and foreground for all components inside dialog
+    setColorsRecursive(dialog.getContentPane(), Color.BLACK, Color.WHITE);
+    
+    dialog.setVisible(true);
 }
+
+// Helper method to set background/foreground recursively
+private void setColorsRecursive(Container container, Color bg, Color fg) {
+    for (Component comp : container.getComponents()) {
+        comp.setBackground(bg);
+        comp.setForeground(fg);
+        if (comp instanceof Container) {
+            setColorsRecursive((Container) comp, bg, fg);
+        }
+    }
+}
+
 
     private void addField(JPanel panel, String labelText, JTextField field, Font font) {
         JLabel label = new JLabel(labelText);

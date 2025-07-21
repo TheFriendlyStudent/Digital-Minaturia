@@ -10,4 +10,6 @@ public interface Entity {
 
     void setAtts(Object[] atts);
 
+    String getCountry();
+
 }

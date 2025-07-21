@@ -31,6 +31,7 @@ public class Ammunition implements Entity {
         return cost;
     }
 
+    @Override
     public String getCountry() {
         return country;
     }
@@ -53,6 +54,10 @@ public class Ammunition implements Entity {
                 + ", unit=" + unit
                 + ", cost=" + cost
                 + '}';
+    }
+
+    public static String[] getTypes() {
+        return types;
     }
 
 }

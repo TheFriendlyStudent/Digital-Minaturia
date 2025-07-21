@@ -22,6 +22,7 @@ public class Firearm implements Entity {
         return new Object[]{name, type, units, cost};
     }
 
+    @Override
     public String getCountry() {
         return country;
     }
@@ -50,6 +51,10 @@ public class Firearm implements Entity {
                 + ", country='" + country + '\''
                 + ", cost=" + cost
                 + '}';
+    }
+
+    public static String[] getTypes() {
+        return types;
     }
 
 }

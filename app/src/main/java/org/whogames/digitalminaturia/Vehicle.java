@@ -43,6 +43,7 @@ public class Vehicle implements Entity {
         return units;
     }
 
+    @Override
     public String getCountry() {
         return country;
     }
@@ -55,6 +56,10 @@ public class Vehicle implements Entity {
                 + ", units=" + units
                 + ", cost=" + cost
                 + '}';
+    }
+
+    public static String[] getTypes() {
+        return types;
     }
 
 }
