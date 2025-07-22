@@ -13,6 +13,7 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.NoninvertibleTransformException;
@@ -32,6 +33,7 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -44,6 +46,9 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
+import javax.swing.ToolTipManager;
+import javax.swing.UIManager;
 import javax.swing.plaf.basic.BasicScrollBarUI;
 import javax.swing.text.Caret;
 import javax.swing.text.DefaultCaret;
@@ -128,6 +133,13 @@ public class SVGMapViewer {
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     frame.setLayout(new BorderLayout());
      // Setup layered pane for svg and overlays
+    ToolTipManager.sharedInstance().setInitialDelay(100);
+    ToolTipManager.sharedInstance().setDismissDelay(4000);
+    UIManager.put("ToolTip.background", Color.BLACK);
+    UIManager.put("ToolTip.foreground", Color.WHITE);
+    UIManager.put("ToolTip.font", new Font("Monospaced", Font.PLAIN, 12));
+    UIManager.put("ToolTip.border", BorderFactory.createLineBorder(Color.WHITE));
+
     JPanel cards = new JPanel(new CardLayout());
 
         JScrollPane scrollPane = new JScrollPane(cards); 
@@ -432,6 +444,7 @@ scrollPane.getHorizontalScrollBar().setUI(new BasicScrollBarUI() {
 
                         String encID = provinceList.get(provinceId - 1).getCountry().replace("'", "").replaceAll("\\s+", "-");
                         el.setAttribute("style", "fill: url(#" + encID + ");");
+                        attachTooltipListeners(el, provinceList.get(provinceId-1).getName());
 
                         // Enable pointer events
                         el.setAttribute("pointer-events", "visiblePainted");
@@ -601,6 +614,32 @@ for (Map.Entry<String, JSVGCanvas> entry : canvasMap.entrySet()) {
 
     }
 
+private void attachTooltipListeners(Element el, String tooltipText) {
+    EventTarget target = (EventTarget) el;
+
+    target.addEventListener("mouseover", evt -> {
+        SwingUtilities.invokeLater(() -> {
+            JComponent mapLayer = canvasMap.get("Map Layer");
+            mapLayer.setToolTipText(tooltipText);
+
+            Point mousePos = mapLayer.getMousePosition();
+            if (mousePos != null) {
+                ToolTipManager.sharedInstance().mouseMoved(
+                    new MouseEvent(mapLayer, MouseEvent.MOUSE_MOVED, System.currentTimeMillis(), 0,
+                        mousePos.x, mousePos.y, 0, false)
+                );
+            }
+        });
+    }, false);
+
+    target.addEventListener("mouseout", evt -> {
+        SwingUtilities.invokeLater(() -> {
+            canvasMap.get("Map Layer").setToolTipText(null);
+        });
+    }, false);
+}
+
+
     private void updateInventoryForCountry(String country) {
         if (country == null) {
             showStyledDialog("No country selected.");
@@ -609,6 +648,29 @@ for (Map.Entry<String, JSVGCanvas> entry : canvasMap.entrySet()) {
 
         // Example logic to update inventory based on production controls
         String selectedResource = (String) resourceSelect.getSelectedItem();
+        int fuelAmount = fuelSlider.getValue();
+
+        Entity resource = entityMap.get(selectedResource);
+        Country A = getCountryByName(country);
+        if (resource != null && A != null) {
+            if (A.getInventory().containsKey(resource)) {
+                int currentAmount = A.getInventory().get(resource);
+                A.getInventory().put(resource, currentAmount + fuelAmount);
+            } else {
+                A.getInventory().put(resource, fuelAmount);
+            }
+            showStyledDialog("Added");
+        }
+    }
+
+    private void updateTechnology(String country) {
+        if (country == null) {
+            showStyledDialog("No country selected.");
+            return;
+        }
+
+        // Example logic to update inventory based on production controls
+        String selectedResource = (String) techSelect.getSelectedItem();
         int fuelAmount = fuelSlider.getValue();
 
         Entity resource = entityMap.get(selectedResource);
