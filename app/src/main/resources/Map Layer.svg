@@ -6,13 +6,13 @@
     <pattern id="United-Republic-of-Stoneland" x="0" y="0" width="15" height="15" patternUnits="userSpaceOnUse">
       <polygon points="7.5,12.5 14.34,0.66 0.66,0.66" fill="black" stroke="white" stroke-width="0.75" />
     </pattern>
-    <pattern id="Eirikr" x="0" y="0" width="15" height="15" patternUnits="userSpaceOnUse">
-      <rect x="0" width="7.5" height="7.5" y="0" fill="white"></rect>
-      <rect x="7.5" width="7.5" height="7.5" y="7.5" fill="white"></rect>
+    <pattern id="Eirikr" x="0" y="0" width="7.5" height="20" patternUnits="userSpaceOnUse">
+      <rect x="0" width="3.25" height="10" y="0" fill="white"></rect>
+      <rect x="3.25" width="3.25" height="10" y="10" fill="white"></rect>
     </pattern>
-    <pattern id="Meehanistan" x="0" y="0" width="5" height="10" patternUnits="userSpaceOnUse">
-      <rect x="0" width="5" height="5" y="0" fill="white"></rect>
-      <rect x="0" width="5" height="5" y="5" fill="black"></rect>
+    <pattern id="Meehanistan" x="0" y="0" width="5" height="5" patternUnits="userSpaceOnUse">
+      <rect x="0" width="5" height="2.5" y="0" fill="white"></rect>
+      <rect x="0" width="5" height="2.5" y="2.5" fill="black"></rect>
     </pattern>
     <pattern id="Gormanistan" x="0" y="0" width="7.5" height="5" patternUnits="userSpaceOnUse">
       <rect x="0" width="2.5" height="5" y="0" fill="white"></rect>
@@ -24,7 +24,7 @@
     fill="white"/>
     </pattern>
     <pattern id="Scotchland" x="0" y="0" width="10" height="10" patternUnits="userSpaceOnUse">
-      <path d="M0,0 L10,10 M10,0 L0,10" stroke="#ffffff" stroke-width="2"/>
+      <path d="M0,0 L10,10 M10,0 L0,10" stroke="#ffffff" stroke-width="0.5"/>
     </pattern>
     <pattern id="Brazealian-Guinea" x="0" y="0" width="6" height="6" patternUnits="userSpaceOnUse">
       <rect x="0" width="4" height="4" y="0" fill="white" stroke="black" stroke-width="1"></rect>

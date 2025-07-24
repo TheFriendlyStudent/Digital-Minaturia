@@ -290,6 +290,8 @@ scrollPane.getHorizontalScrollBar().setUI(new BasicScrollBarUI() {
     JTextField cityTypeField = createBlinkingCaretField(10);
     JTextField budget1Field = createBlinkingCaretField(10);
     JTextField budget2Field = createBlinkingCaretField(10);
+
+    JTextField newTechName = createBlinkingCaretField(10);
     JButton updateButton = new JButton("Save Changes");
 
     JTextField[] fields = {
@@ -347,6 +349,7 @@ scrollPane.getHorizontalScrollBar().setUI(new BasicScrollBarUI() {
     techSelect.setForeground(Color.WHITE);
     techSelect.setFont(consoleFont);
     techSelect.setBorder(BorderFactory.createLineBorder(Color.WHITE));
+    styleTextField(newTechName, font);
 
     cards.setPreferredSize(new Dimension(2000, 1250));
     for (String svgFi : SvgFiles){
@@ -384,6 +387,7 @@ scrollPane.getHorizontalScrollBar().setUI(new BasicScrollBarUI() {
     layeredPaneMap.get("Production Layer").add(foodInput, JLayeredPane.PALETTE_LAYER);
 
     layeredPaneMap.get("Research Layer").add(techSelect, JLayeredPane.PALETTE_LAYER);
+    layeredPaneMap.get("Research Layer").add(newTechName, JLayeredPane.PALETTE_LAYER);
 
         mapButton.addActionListener(e -> {
             CardLayout c = (CardLayout)cards.getLayout();
@@ -570,6 +574,7 @@ scrollPane.getHorizontalScrollBar().setUI(new BasicScrollBarUI() {
 
                 resourceSelect.setBounds(x, y, width, height);
                 techSelect.setBounds(x, y, width, height);
+                newTechName.setBounds(x + xSpacing, y, width, height);
                 fuelSlider.setBounds(x + xSpacing, y, width + 70, sliderHeight);
                 foodInput.setBounds(x, y + spacing, width, height);
                 System.out.println("layeredPane preferred size: " + cards.getPreferredSize());
@@ -908,7 +913,7 @@ private void setColorsRecursive(Container container, Color bg, Color fg) {
     if (dest.exists()) return;
 
     try (InputStream in = getClass().getResourceAsStream("/" + resourceName);
-         FileOutputStream out = new FileOutputStream(dest)) {
+        FileOutputStream out = new FileOutputStream(dest)) {
         if (in == null) throw new IOException("Resource not found: " + resourceName);
         byte[] buffer = new byte[1024];
         int len;

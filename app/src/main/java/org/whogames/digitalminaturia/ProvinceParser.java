@@ -2,12 +2,15 @@ package org.whogames.digitalminaturia;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -17,12 +20,28 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
+import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
+import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.services.sheets.v4.Sheets;
+import com.google.api.services.sheets.v4.SheetsScopes;
+import com.google.api.services.sheets.v4.model.AddSheetRequest;
+import com.google.api.services.sheets.v4.model.BatchUpdateSpreadsheetRequest;
+import com.google.api.services.sheets.v4.model.ClearValuesRequest;
+import com.google.api.services.sheets.v4.model.Request;
+import com.google.api.services.sheets.v4.model.Sheet;
+import com.google.api.services.sheets.v4.model.SheetProperties;
+import com.google.api.services.sheets.v4.model.Spreadsheet;
+import com.google.api.services.sheets.v4.model.ValueRange;
+
 public class ProvinceParser {
 
     private static final File dataDir = new File(System.getProperty("user.home"), "MinaturiaData");
     private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2); 
 
     private static final Map<String, Object> fileLocks = new ConcurrentHashMap<>();
+    public static final String SPREADSHEET_ID = "1zdxiifVs-smN-kDVvuUSdTdnfzJYnJkxKQo4BCWI9uY";
 
     static {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -31,7 +50,11 @@ public class ProvinceParser {
                 if (!scheduler.awaitTermination(5, TimeUnit.SECONDS)) {
                     scheduler.shutdownNow();
                 }
-            } catch (InterruptedException e) {
+                            // Then upload all CSVs to Google Sheets
+                System.out.println("Uploading CSVs to Google Sheets before exit...");
+                new ProvinceParser().uploadAllCSVsToGoogleSheet();
+            } catch (Exception e) {
+                System.err.println("Error during shutdown upload:");
                 scheduler.shutdownNow();
             }
         }));
@@ -44,6 +67,96 @@ public class ProvinceParser {
         }
     }, 0, 1, TimeUnit.SECONDS);
     }
+
+    public Sheets getSheetsService() throws Exception {
+    JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
+    InputStream inputStream = getClass().getClassLoader().getResourceAsStream("scientific-reef-286121-49506ff8a036.json");
+
+if (inputStream == null) {
+    throw new FileNotFoundException("Could not find credentials JSON in classpath.");
+}
+   
+GoogleCredential credential = GoogleCredential.fromStream(inputStream)
+    .createScoped(Collections.singleton(SheetsScopes.SPREADSHEETS));
+    
+    return new Sheets.Builder(GoogleNetHttpTransport.newTrustedTransport(), jsonFactory, credential)
+        .setApplicationName("Digital Minaturia Uploader")
+        .build();
+    }
+
+    public void uploadCSVToSheet(String csvFilePath, String spreadsheetId, String sheetName) throws Exception {
+    Sheets service = getSheetsService();
+
+    // Step 1: Check if the sheet exists
+    Spreadsheet spreadsheet = service.spreadsheets().get(spreadsheetId).execute();
+    boolean sheetExists = false;
+    List<Sheet> sheets = spreadsheet.getSheets();
+    for (Sheet sheet : sheets) {
+        if (sheet.getProperties().getTitle().equalsIgnoreCase(sheetName)) {
+            sheetExists = true;
+            break;
+        }
+    }
+
+    // Step 2: Create the sheet if it doesn't exist
+    if (!sheetExists) {
+        AddSheetRequest addSheetRequest = new AddSheetRequest();
+        SheetProperties sheetProperties = new SheetProperties();
+        sheetProperties.setTitle(sheetName);
+        addSheetRequest.setProperties(sheetProperties);
+
+        Request request = new Request();
+        request.setAddSheet(addSheetRequest);
+
+        BatchUpdateSpreadsheetRequest batchUpdateRequest = new BatchUpdateSpreadsheetRequest();
+        batchUpdateRequest.setRequests(Collections.singletonList(request));
+
+        service.spreadsheets().batchUpdate(spreadsheetId, batchUpdateRequest).execute();
+        System.out.println("Created new sheet: " + sheetName);
+    }
+
+    // Step 3: Read CSV data
+    List<List<Object>> values = new ArrayList<>();
+    try (BufferedReader br = new BufferedReader(new FileReader(csvFilePath))) {
+        String line;
+        while ((line = br.readLine()) != null) {
+            String[] tokens = line.split(",");
+            List<Object> row = new ArrayList<>();
+            for (String token : tokens) {
+                row.add(token.trim());
+            }
+            values.add(row);
+        }
+    }
+
+    // Step 4: Clear existing data in the sheet
+    service.spreadsheets().values().clear(spreadsheetId, sheetName + "!A:Z", new ClearValuesRequest()).execute();
+
+    // Step 5: Upload new data
+    ValueRange body = new ValueRange().setValues(values);
+    service.spreadsheets().values()
+        .update(spreadsheetId, sheetName + "!A1", body)
+        .setValueInputOption("RAW")
+        .execute();
+
+    System.out.println("CSV uploaded to sheet: " + sheetName);
+}
+
+public void uploadAllCSVsToGoogleSheet() throws Exception {
+    File[] csvFiles = dataDir.listFiles((dir, name) -> name.endsWith(".csv"));
+    if (csvFiles == null) return;
+
+    for (File csv : csvFiles) {
+        String sheetName = csv.getName().replace(".csv", ""); // e.g. "France Inventory"
+        try {
+            uploadCSVToSheet(csv.getAbsolutePath(), SPREADSHEET_ID, sheetName);
+        } catch (Exception e) {
+            System.err.println("Failed to upload " + csv.getName() + ": " + e.getMessage());
+            e.printStackTrace();
+            // optionally continue with other files
+        }
+    }
+}
 
     public static ArrayList<Province> parseProvinces(Reader reader) throws IOException {
         ArrayList<Province> provinces = new ArrayList<>();
