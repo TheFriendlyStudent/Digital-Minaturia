@@ -2,7 +2,7 @@ package org.whogames.digitalminaturia;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -70,11 +70,13 @@ public class ProvinceParser {
 
     public Sheets getSheetsService() throws Exception {
     JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
-    InputStream inputStream = getClass().getClassLoader().getResourceAsStream("scientific-reef-286121-49506ff8a036.json");
+    String credentialsPath = System.getenv("GOOGLE_APPLICATION_CREDENTIALS");
 
-if (inputStream == null) {
-    throw new FileNotFoundException("Could not find credentials JSON in classpath.");
-}
+    if (credentialsPath == null || credentialsPath.isEmpty()) {
+        throw new IllegalStateException("Environment variable GOOGLE_APPLICATION_CREDENTIALS is not set.");
+    }
+
+    InputStream inputStream = new FileInputStream(credentialsPath);
    
 GoogleCredential credential = GoogleCredential.fromStream(inputStream)
     .createScoped(Collections.singleton(SheetsScopes.SPREADSHEETS));
