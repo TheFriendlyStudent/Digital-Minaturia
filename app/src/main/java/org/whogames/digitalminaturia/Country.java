@@ -9,6 +9,7 @@ public class Country {
     private ArrayList<Province> provinces;
     private HashMap<Entity, Integer> inventory = new HashMap<>();
     private ArrayList<Squad> squads = new ArrayList<>();
+    private double availableCap;
 
     // Added fields from CSV
     private String capital;
@@ -25,7 +26,7 @@ public class Country {
     private double gdpPerCapita;
     private double incomePerCapita;
     private double medianIncome;
-    private double happiness;
+    private double productionCapacity;
 
     public Country(String name) {
         this.name = name;
@@ -40,7 +41,7 @@ public class Country {
         return totalPopulation;
     }
 
-    public Country(String name, String capital, int population, int cities, int universities, double gdp, double taxRate, double gdpGrowth, long baseBudget, double debtRatio, long militarySpending, double inflationRate, double gdpPerCapita, double incomePerCapita, double medianIncome, double happiness) {
+    public Country(String name, String capital, int population, int cities, int universities, double gdp, double taxRate, double gdpGrowth, long baseBudget, double debtRatio, long militarySpending, double inflationRate, double gdpPerCapita, double incomePerCapita, double medianIncome, double productionCapacity) {
         this.name = name;
         this.capital = capital;
         this.population = population;
@@ -56,7 +57,8 @@ public class Country {
         this.gdpPerCapita = gdpPerCapita;
         this.incomePerCapita = incomePerCapita;
         this.medianIncome = medianIncome;
-        this.happiness = happiness;
+        this.productionCapacity = productionCapacity;
+        this.availableCap = productionCapacity;
         this.provinces = new ArrayList<>();
     }
 
@@ -185,12 +187,12 @@ public class Country {
         this.medianIncome = medianIncome;
     }
 
-    public double getHappiness() {
-        return happiness;
+    public double getCapacity() {
+        return productionCapacity;
     }
 
-    public void setHappiness(double happiness) {
-        this.happiness = happiness;
+    public void setCapacity(double productionCapacity) {
+        this.productionCapacity = productionCapacity;
     }
 
     @Override
