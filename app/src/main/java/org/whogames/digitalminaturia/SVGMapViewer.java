@@ -9,6 +9,7 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Graphics;
+import java.awt.GridLayout;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.ComponentAdapter;
@@ -42,14 +43,18 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSlider;
+import javax.swing.JSpinner;
+import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
 import javax.swing.UIManager;
 import javax.swing.plaf.basic.BasicScrollBarUI;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.text.Caret;
 import javax.swing.text.DefaultCaret;
 
@@ -348,6 +353,12 @@ scrollPane.getHorizontalScrollBar().setUI(new BasicScrollBarUI() {
     techSelect.setFont(consoleFont);
     techSelect.setBorder(BorderFactory.createLineBorder(Color.WHITE));
 
+    JButton createSquad = new JButton("New Squad");
+    createSquad.setBackground(Color.BLACK);
+    createSquad.setForeground(Color.WHITE);
+    createSquad.setFont(consoleFont);
+    createSquad.setBorder(BorderFactory.createLineBorder(Color.WHITE));
+
     cards.setPreferredSize(new Dimension(2000, 1250));
     for (String svgFi : SvgFiles){
 
@@ -385,6 +396,8 @@ scrollPane.getHorizontalScrollBar().setUI(new BasicScrollBarUI() {
 
     layeredPaneMap.get("Research Layer").add(techSelect, JLayeredPane.PALETTE_LAYER);
 
+    layeredPaneMap.get("Squad Design Layer").add(createSquad, JLayeredPane.PALETTE_LAYER);
+
         mapButton.addActionListener(e -> {
             CardLayout c = (CardLayout)cards.getLayout();
             c.show(cards, "Map Layer");
@@ -404,6 +417,10 @@ scrollPane.getHorizontalScrollBar().setUI(new BasicScrollBarUI() {
         squadButton.addActionListener(e -> {
             CardLayout c = (CardLayout)cards.getLayout();
             c.show(cards, "Squad Design Layer");
+        });
+
+        createSquad.addActionListener(e -> {
+            createSquadDialog();
         });
 
         foodInput.addActionListener(e -> {
@@ -572,6 +589,7 @@ scrollPane.getHorizontalScrollBar().setUI(new BasicScrollBarUI() {
                 techSelect.setBounds(x, y, width, height);
                 fuelSlider.setBounds(x + xSpacing, y, width + 70, sliderHeight);
                 foodInput.setBounds(x, y + spacing, width, height);
+                createSquad.setBounds(x, y, width, height);
                 System.out.println("layeredPane preferred size: " + cards.getPreferredSize());
                 System.out.println("scroll view size: " + scrollPane.getViewport().getViewSize());
 
@@ -816,6 +834,88 @@ private void showStyledDialog(String message) {
     
     dialog.setVisible(true);
 }
+
+private void createSquadDialog() {
+    
+    // Text field for squad name
+    JTextField nameField = new JTextField(15);
+    nameField.setBackground(Color.BLACK);
+    nameField.setForeground(Color.WHITE);
+    nameField.setCaretColor(Color.WHITE);
+    nameField.setFont(new Font("Monospaced", Font.PLAIN, 14));
+    nameField.setBorder(BorderFactory.createLineBorder(Color.WHITE));
+    
+    // Spinner for squad size
+    JSpinner sizeSpinner = new JSpinner(new SpinnerNumberModel(10, 1, 15, 1));
+    JComponent spinnerEditor = sizeSpinner.getEditor();
+    if (spinnerEditor instanceof JSpinner.DefaultEditor editor) {
+        editor.getTextField().setBackground(Color.BLACK);
+        editor.getTextField().setForeground(Color.WHITE);
+        editor.getTextField().setCaretColor(Color.WHITE);
+        editor.getTextField().setFont(new Font("Monospaced", Font.PLAIN, 14));
+        editor.getTextField().setBorder(BorderFactory.createLineBorder(Color.WHITE));
+    }
+
+    sizeSpinner.setBackground(Color.BLACK);
+    sizeSpinner.setForeground(Color.WHITE);
+
+    JComboBox typeSelect = new JComboBox<>(new String[]{"Ground", "Air", "Water"});
+    typeSelect.setBackground(Color.BLACK);
+    typeSelect.setForeground(Color.WHITE);
+    typeSelect.setFont(new Font("Monospaced", Font.PLAIN, 14));
+    typeSelect.setBorder(BorderFactory.createLineBorder(Color.WHITE));
+    
+    // Panel with black background
+    JPanel panel = new JPanel();
+    panel.setBackground(Color.BLACK);
+    panel.setLayout(new GridLayout(3, 2, 10, 10));
+
+    panel.add(new JLabel("Squad Name:"));
+    panel.add(nameField);
+
+    panel.add(new JLabel("Squad Size:"));
+    panel.add(sizeSpinner);
+
+    panel.add(new JLabel("Squad Designation"));
+    panel.add(typeSelect);
+
+    for (Component c : panel.getComponents()) {
+        c.setForeground(Color.WHITE);
+        c.setFont(new Font("Monospaced", Font.PLAIN, 14));
+    }
+
+    // Show dialog
+    int result = JOptionPane.showConfirmDialog(
+        null,
+        panel,
+        "Create Squad",
+        JOptionPane.OK_CANCEL_OPTION,
+        JOptionPane.PLAIN_MESSAGE
+    );
+
+    if (result == JOptionPane.OK_OPTION) {
+        String name = nameField.getText();
+        int size = (Integer) sizeSpinner.getValue();
+        System.out.println("Squad Created: Name = " + name + ", Size = " + size);
+        // You can now create the squad or pass this info to your data model
+        // Define column names
+        String[] columns = {"Soldier", "Weapon/Vehicle"};
+
+        // Create model with 0 rows initially
+        DefaultTableModel model = new DefaultTableModel(columns, 10);
+
+        // Create JTable with the empty model
+        JTable table = new JTable(model);
+        table.setFont(new Font("Monospaced", Font.PLAIN, 14));
+        table.setForeground(Color.WHITE);
+        table.setBackground(Color.BLACK);
+        table.setGridColor(Color.GRAY);
+        table.setRowHeight(24);
+        ((DefaultTableModel) table.getModel()).addRow(new Object[]{"Alpha", 10});
+        layeredPaneMap.get("Squad Design Layer").add(table, JLayeredPane.PALETTE_LAYER);
+    }
+}
+
 
 // Helper method to set background/foreground recursively
 private void setColorsRecursive(Container container, Color bg, Color fg) {

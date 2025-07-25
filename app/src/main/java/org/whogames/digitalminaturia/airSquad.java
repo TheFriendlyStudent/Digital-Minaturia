@@ -2,15 +2,15 @@ package org.whogames.digitalminaturia;
 
 import java.util.HashMap;
 
-public class groundSquad extends Squad {
+public class airSquad extends Squad {
 
     public HashMap<String, Integer> soldiers;
     public HashMap<Firearm, Integer> firearms;
     public HashMap<Vehicle, Integer> vehicles;
 
-    private int APDamage, ATDamage, Penetration;
+    private int speed, maneuverability, AAdamage, AGdamage;
 
-    public groundSquad(int id, String name, int health, String type, String country, String ammo, int personnel) {
+    public airSquad(int id, String name, int health, String type, String country, String ammo, int personnel) {
         super(id, name, health, type, country, ammo, personnel);
         soldiers = new HashMap<>();
         firearms = new HashMap<>();
