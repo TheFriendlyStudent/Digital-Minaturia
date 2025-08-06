@@ -11,7 +11,6 @@ import java.io.PrintWriter;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,7 +19,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
@@ -34,14 +32,15 @@ import com.google.api.services.sheets.v4.model.Sheet;
 import com.google.api.services.sheets.v4.model.SheetProperties;
 import com.google.api.services.sheets.v4.model.Spreadsheet;
 import com.google.api.services.sheets.v4.model.ValueRange;
+import com.google.auth.http.HttpCredentialsAdapter;
+import com.google.auth.oauth2.GoogleCredentials;
 
 public class ProvinceParser {
 
-    private static final File dataDir = new File(System.getProperty("user.home"), "MinaturiaData");
-    private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2); 
-
-    private static final Map<String, Object> fileLocks = new ConcurrentHashMap<>();
+    private static final File DATA_DIR = new File(System.getProperty("user.home"), "MinaturiaData");
+    private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2);
     public static final String SPREADSHEET_ID = "1zdxiifVs-smN-kDVvuUSdTdnfzJYnJkxKQo4BCWI9uY";
+    private static final Map<String, Object> fileLocks = new ConcurrentHashMap<>();
 
     static {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -50,115 +49,95 @@ public class ProvinceParser {
                 if (!scheduler.awaitTermination(5, TimeUnit.SECONDS)) {
                     scheduler.shutdownNow();
                 }
-                            // Then upload all CSVs to Google Sheets
-                System.out.println("Uploading CSVs to Google Sheets before exit...");
+                System.out.println("Uploading CSVs before exit...");
                 new ProvinceParser().uploadAllCSVsToGoogleSheet();
             } catch (Exception e) {
-                System.err.println("Error during shutdown upload:");
-                scheduler.shutdownNow();
+                System.err.println("Shutdown upload error:");
+                e.printStackTrace();
             }
         }));
 
         scheduler.scheduleAtFixedRate(() -> {
-        try {
-            checkPendingCSVWrites();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }, 0, 1, TimeUnit.SECONDS);
+            try {
+                checkPendingCSVWrites();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }, 0, 1, TimeUnit.SECONDS);
     }
 
     public Sheets getSheetsService() throws Exception {
-    JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
-    String credentialsPath = System.getenv("GOOGLE_APPLICATION_CREDENTIALS");
+        String credentialsPath = System.getenv("GOOGLE_APPLICATION_CREDENTIALS");
+        System.out.println(credentialsPath);
+        if (credentialsPath == null || credentialsPath.isEmpty()) {
+            throw new IllegalStateException("Env var GOOGLE_APPLICATION_CREDENTIALS is not set.");
+        }
 
-    if (credentialsPath == null || credentialsPath.isEmpty()) {
-        throw new IllegalStateException("Environment variable GOOGLE_APPLICATION_CREDENTIALS is not set.");
-    }
-
-    InputStream inputStream = new FileInputStream(credentialsPath);
-   
-GoogleCredential credential = GoogleCredential.fromStream(inputStream)
-    .createScoped(Collections.singleton(SheetsScopes.SPREADSHEETS));
-    
-    return new Sheets.Builder(GoogleNetHttpTransport.newTrustedTransport(), jsonFactory, credential)
-        .setApplicationName("Digital Minaturia Uploader")
-        .build();
-    }
-
-    public void uploadCSVToSheet(String csvFilePath, String spreadsheetId, String sheetName) throws Exception {
-    Sheets service = getSheetsService();
-
-    // Step 1: Check if the sheet exists
-    Spreadsheet spreadsheet = service.spreadsheets().get(spreadsheetId).execute();
-    boolean sheetExists = false;
-    List<Sheet> sheets = spreadsheet.getSheets();
-    for (Sheet sheet : sheets) {
-        if (sheet.getProperties().getTitle().equalsIgnoreCase(sheetName)) {
-            sheetExists = true;
-            break;
+        JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
+        try (InputStream in = new FileInputStream(credentialsPath)) {
+            GoogleCredentials creds = GoogleCredentials.fromStream(in)
+                    .createScoped(Collections.singletonList(SheetsScopes.SPREADSHEETS));
+            return new Sheets.Builder(
+                    GoogleNetHttpTransport.newTrustedTransport(),
+                    jsonFactory,
+                    new HttpCredentialsAdapter(creds)
+            ).setApplicationName("Digital Minaturia Uploader").build();
         }
     }
 
-    // Step 2: Create the sheet if it doesn't exist
-    if (!sheetExists) {
-        AddSheetRequest addSheetRequest = new AddSheetRequest();
-        SheetProperties sheetProperties = new SheetProperties();
-        sheetProperties.setTitle(sheetName);
-        addSheetRequest.setProperties(sheetProperties);
+    public void uploadCSVToSheet(String csvPath, String sheetName) throws Exception {
+        Sheets svc = getSheetsService();
+        Spreadsheet ss = svc.spreadsheets().get(SPREADSHEET_ID).execute();
 
-        Request request = new Request();
-        request.setAddSheet(addSheetRequest);
+        boolean exists = ss.getSheets().stream()
+                .map(Sheet::getProperties)
+                .map(SheetProperties::getTitle)
+                .anyMatch(title -> title.equalsIgnoreCase(sheetName));
 
-        BatchUpdateSpreadsheetRequest batchUpdateRequest = new BatchUpdateSpreadsheetRequest();
-        batchUpdateRequest.setRequests(Collections.singletonList(request));
+        if (!exists) {
+            AddSheetRequest add = new AddSheetRequest()
+                    .setProperties(new SheetProperties().setTitle(sheetName));
+            BatchUpdateSpreadsheetRequest req = new BatchUpdateSpreadsheetRequest()
+                    .setRequests(Collections.singletonList(new Request().setAddSheet(add)));
+            svc.spreadsheets().batchUpdate(SPREADSHEET_ID, req).execute();
+            System.out.println("Created sheet " + sheetName);
+        }
 
-        service.spreadsheets().batchUpdate(spreadsheetId, batchUpdateRequest).execute();
-        System.out.println("Created new sheet: " + sheetName);
-    }
-
-    // Step 3: Read CSV data
-    List<List<Object>> values = new ArrayList<>();
-    try (BufferedReader br = new BufferedReader(new FileReader(csvFilePath))) {
-        String line;
-        while ((line = br.readLine()) != null) {
-            String[] tokens = line.split(",");
-            List<Object> row = new ArrayList<>();
-            for (String token : tokens) {
-                row.add(token.trim());
+        List<List<Object>> data = new ArrayList<>();
+        try (BufferedReader br = new BufferedReader(new FileReader(csvPath))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                List<Object> row = new ArrayList<>();
+                for (String tok : line.split(",")) row.add(tok.trim());
+                data.add(row);
             }
-            values.add(row);
         }
+
+        svc.spreadsheets().values()
+                .clear(SPREADSHEET_ID, sheetName + "!A:Z", new ClearValuesRequest())
+                .execute();
+
+        svc.spreadsheets().values()
+                .update(SPREADSHEET_ID, sheetName + "!A1", new ValueRange().setValues(data))
+                .setValueInputOption("RAW")
+                .execute();
+
+        System.out.println("Uploaded CSV to sheet: " + sheetName);
     }
 
-    // Step 4: Clear existing data in the sheet
-    service.spreadsheets().values().clear(spreadsheetId, sheetName + "!A:Z", new ClearValuesRequest()).execute();
-
-    // Step 5: Upload new data
-    ValueRange body = new ValueRange().setValues(values);
-    service.spreadsheets().values()
-        .update(spreadsheetId, sheetName + "!A1", body)
-        .setValueInputOption("RAW")
-        .execute();
-
-    System.out.println("CSV uploaded to sheet: " + sheetName);
-}
-
-public void uploadAllCSVsToGoogleSheet() throws Exception {
-    File[] csvFiles = dataDir.listFiles((dir, name) -> name.endsWith(".csv"));
-    if (csvFiles == null) return;
-
-    for (File csv : csvFiles) {
-        String sheetName = csv.getName().replace(".csv", ""); // e.g. "France Inventory"
-        try {
-            uploadCSVToSheet(csv.getAbsolutePath(), SPREADSHEET_ID, sheetName);
-        } catch (Exception e) {
-            System.err.println("Failed to upload " + csv.getName() + ": " + e.getMessage());
-            e.printStackTrace();
-            // optionally continue with other files
+    public void uploadAllCSVsToGoogleSheet() {
+        File[] files = DATA_DIR.listFiles((d, name) -> name.endsWith(".csv"));
+        if (files == null) return;
+        for (File f : files) {
+            String sheetName = f.getName().replace(".csv", "");
+            try {
+                uploadCSVToSheet(f.getAbsolutePath(), sheetName);
+            } catch (Exception e) {
+                System.err.println("Failed upload: " + f.getName());
+                e.printStackTrace();
+            }
         }
     }
-}
 
     public static ArrayList<Province> parseProvinces(Reader reader) throws IOException {
         ArrayList<Province> provinces = new ArrayList<>();
@@ -311,12 +290,43 @@ public void uploadAllCSVsToGoogleSheet() throws Exception {
         return technology;
     }
 
-    public static void writeProvincesToCSV(ArrayList<Province> provinces, String filePath) throws IOException {
+    public static void parseInventory(Reader reader, Country country, Map<String, Entity> entityMap) throws IOException {
+        BufferedReader br = new BufferedReader(reader);
+        String line;
+
+        while ((line = br.readLine()) != null) {
+            if (line.trim().isEmpty()) {
+                continue;
+            }
+
+            String[] tokens = line.split(",");
+
+            if (tokens.length < 2) {
+                System.err.println("Skipping malformed inventory line: " + line);
+                continue;
+            }
+
+            String itemName = tokens[0].trim();
+            System.out.println("Processing item: " + itemName);
+            int quantity;
+
+            try {
+                quantity = Integer.parseInt(tokens[1].trim());
+            } catch (NumberFormatException e) {
+                System.err.println("Invalid quantity in inventory line: " + line);
+                continue;
+            }
+
+            Entity entity = entityMap.get(itemName);
+            country.getInventory().put(entity, quantity);
+        }
+    }
+
+    public static void writeProvincesToCSV(List<Province> provinces, String filePath) throws IOException {
         File outFile = new File(filePath);
         System.out.println("Attempting to write to: " + outFile.getAbsolutePath());
 
         try (PrintWriter writer = new PrintWriter(new FileWriter(outFile))) {
-
             for (Province p : provinces) {
                 writer.printf("%d,%s,%s,%s,%d,%s,%d,%s,%d,%d%n",
                         p.getId(),
@@ -330,7 +340,6 @@ public void uploadAllCSVsToGoogleSheet() throws Exception {
                         p.getBudget1(),
                         p.getBudget2());
             }
-
             System.out.println("CSV file successfully updated.");
         } catch (IOException e) {
             System.err.println("Failed to write CSV: " + e.getMessage());
@@ -386,101 +395,52 @@ public void uploadAllCSVsToGoogleSheet() throws Exception {
         }
     }
 
-    public static void parseInventory(Reader reader, Country country, HashMap<String, Entity> entityMap) throws IOException {
-        BufferedReader br = new BufferedReader(reader);
-        String line;
-
-        while ((line = br.readLine()) != null) {
-            if (line.trim().isEmpty()) {
-                continue;
+    public static void scheduleCSVWrite(String countryName) throws IOException {
+        long ts = System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(1);
+        File f = new File(DATA_DIR, countryName + "_write_time.txt");
+        synchronized (fileLocks.computeIfAbsent(countryName, k -> new Object())) {
+            try (PrintWriter w = new PrintWriter(new FileWriter(f, true))) {
+                w.println(ts);
             }
-
-            String[] tokens = line.split(",");
-
-            if (tokens.length < 2) {
-                System.err.println("Skipping malformed inventory line: " + line);
-                continue;
-            }
-
-            String itemName = tokens[0].trim();
-            System.out.println("Processing item: " + itemName);
-            int quantity;
-
-            try {
-                quantity = Integer.parseInt(tokens[1].trim());
-            } catch (NumberFormatException e) {
-                System.err.println("Invalid quantity in inventory line: " + line);
-                continue;
-            }
-
-            Entity A = entityMap.get(itemName);
-
-            country.getInventory().put(A, quantity);
         }
     }
 
-public static void scheduleCSVWrite(String countryName) {
-        long delayMillis = 60 * 1000; // 1 minute
-        long scheduledTime = System.currentTimeMillis() + delayMillis;
-
-try (FileWriter writer = new FileWriter(new File(dataDir, countryName + "_write_time.txt"), true)) { // append=true
-    writer.write(Long.toString(scheduledTime));
-    System.out.println(scheduledTime);
-    writer.write(System.lineSeparator());
-} catch (IOException e) {
-    e.printStackTrace();
-}
-
-    }
-
-public static void checkPendingCSVWrites() {
-    File[] files = dataDir.listFiles((dir, name) -> name.endsWith("_write_time.txt"));
-    if (files == null) return;
-
-    for (File file : files) {
-        String countryName = file.getName().replace("_write_time.txt", "");
-        Country country = SVGMapViewer.getCountryByName(countryName);
-        if (country == null) {
-            System.err.println("Country not found: " + countryName);
-            continue;
-        }
-
-        List<Long> scheduledTimes = new ArrayList<>();
-        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                try {
-                    scheduledTimes.add(Long.parseLong(line.trim()));
-                } catch (NumberFormatException e) {
-                    System.err.println("Invalid timestamp in " + file.getName() + ": " + line);
+    public static void checkPendingCSVWrites() {
+        File[] files = DATA_DIR.listFiles((d, name) -> name.endsWith("_write_time.txt"));
+        if (files == null) return;
+        for (File f : files) {
+            String cn = f.getName().replace("_write_time.txt", "");
+            Country country = SVGMapViewer.getCountryByName(cn);
+            if (country == null) {
+                System.err.println("No country: " + cn);
+                continue;
+            }
+            List<Long> times = new ArrayList<>();
+            try (BufferedReader br = new BufferedReader(new FileReader(f))) {
+                String l;
+                while ((l = br.readLine()) != null) {
+                    try {
+                        times.add(Long.parseLong(l.trim()));
+                    } catch (NumberFormatException ignore) {
+                    }
                 }
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-            continue;
-        }
-
-        for (Long scheduledTime : scheduledTimes) {
-            long delay = scheduledTime - System.currentTimeMillis();
-            Runnable task = () -> {
-                try {
-                    writeInventoryToCSV(country, new File(dataDir, countryName + " Inventory.csv").getAbsolutePath());
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            };
-
-            if (delay <= 0) {
-                scheduler.execute(task); // run immediately
-            } else {
-                scheduler.schedule(task, delay, TimeUnit.MILLISECONDS); // delay execution
+            for (Long ts : times) {
+                long delay = ts - System.currentTimeMillis();
+                Runnable task = () -> {
+                    try {
+                        writeInventoryToCSV(country,
+                                new File(DATA_DIR, cn + " Inventory.csv").getAbsolutePath());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                };
+                if (delay <= 0) scheduler.execute(task);
+                else scheduler.schedule(task, delay, TimeUnit.MILLISECONDS);
             }
+            f.delete();
         }
-
-        file.delete(); // Remove write_time file after processing all entries
     }
-}
-
-
-
 }

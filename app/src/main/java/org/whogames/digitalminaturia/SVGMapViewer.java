@@ -414,7 +414,12 @@ scrollPane.getHorizontalScrollBar().setUI(new BasicScrollBarUI() {
             if (currentProvince == null || currentProvince.getCountry() == null) {
                 JOptionPane.showMessageDialog(canvasMap.get("Map Layer"), "No province selected.");
             } else {
-                ProvinceParser.scheduleCSVWrite(currentProvince.getCountry()); // TODO Auto-generated catch block
+                try {
+                    ProvinceParser.scheduleCSVWrite(currentProvince.getCountry());
+                } catch (IOException e1) {
+                    // TODO Auto-generated catch block
+                    e1.printStackTrace();
+                } // TODO Auto-generated catch block
                 updateProductionLayer(getCountryByName(currentProvince.getCountry()));
                 updateInventoryForCountry(currentProvince.getCountry());
             }
