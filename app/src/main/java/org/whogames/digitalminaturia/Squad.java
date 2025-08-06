@@ -6,9 +6,9 @@ public abstract class Squad {
 
     private int id;
     private String name;
-    private int health;
+    protected int health;
     private String type;
-    private String country;
+    protected String country;
     private String ammo;
     private int personnel;
 

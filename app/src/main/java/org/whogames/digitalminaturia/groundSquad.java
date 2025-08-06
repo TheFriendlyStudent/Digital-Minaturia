@@ -1,6 +1,7 @@
 package org.whogames.digitalminaturia;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public class groundSquad extends Squad {
 
@@ -34,6 +35,15 @@ public class groundSquad extends Squad {
 
     public HashMap<String, Integer> getSoldiers() {
         return soldiers;
+    }
+
+    public int calculateHealth(){
+        for (Map.Entry<String, Integer> e : soldiers.entrySet()){
+            if (e.getKey().equals("Rifleman")){
+                this.health+=e.getValue()*3;
+            }
+        }
+        return 0;
     }
 
     @Override
