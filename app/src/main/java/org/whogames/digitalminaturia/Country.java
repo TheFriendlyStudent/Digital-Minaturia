@@ -9,6 +9,7 @@ public class Country {
     private ArrayList<Province> provinces;
     private HashMap<Entity, Integer> inventory = new HashMap<>();
     private ArrayList<Squad> squads = new ArrayList<>();
+    private ArrayList<Battalion> battalions = new ArrayList<>();
 
     // Added fields from CSV
     private String capital;

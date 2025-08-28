@@ -1,5 +1,7 @@
 package org.whogames.digitalminaturia;
 
+import java.util.ArrayList;
+
 public class Province {
 
     private int id;
@@ -12,6 +14,7 @@ public class Province {
     private String cityType;
     private long budget1;
     private long budget2;
+    private ArrayList<Battalion> battalions = new ArrayList<Battalion>();
 
     public Province(int id, String name, String country, String language, int population,
             String terrain, int tier, String cityType, long budget1, long budget2) {
