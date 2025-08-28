@@ -1,7 +1,5 @@
 package org.whogames.digitalminaturia;
 
-import java.util.HashMap;
-
 public abstract class Squad {
 
     private int id;
@@ -12,7 +10,6 @@ public abstract class Squad {
     private String ammo;
     private int personnel;
 
-    private static HashMap<String, Squad> squadMap = new HashMap<>();
 
     public Squad(int id, String name, int health, String type, String country, String ammo, int personnel) {
         this.id = id;
