@@ -8,8 +8,6 @@ public abstract class Squad {
     private String type;
     protected String country;
     private String ammo;
-    private int personnel;
-
 
     public Squad(int id, String name, int health, String type, String country, String ammo, int personnel) {
         this.id = id;
@@ -18,7 +16,6 @@ public abstract class Squad {
         this.type = type;
         this.country = country;
         this.ammo = ammo;
-        this.personnel = personnel;
     }
 
     public int getId() {

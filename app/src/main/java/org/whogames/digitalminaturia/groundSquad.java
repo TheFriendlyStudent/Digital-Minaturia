@@ -16,6 +16,7 @@ public class groundSquad extends Squad {
         soldiers = new HashMap<>();
         firearms = new HashMap<>();
         vehicles = new HashMap<>();
+        calculateHealth();
     }
 
     public void addSoldier(String soldierName, int count) {

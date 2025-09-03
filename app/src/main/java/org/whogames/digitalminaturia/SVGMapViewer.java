@@ -70,7 +70,6 @@ import org.w3c.dom.NodeList;
 import org.w3c.dom.events.EventTarget;
 import org.w3c.dom.svg.SVGDocument;
 
-
 public class SVGMapViewer {
 
     private Element selectedElement = null;

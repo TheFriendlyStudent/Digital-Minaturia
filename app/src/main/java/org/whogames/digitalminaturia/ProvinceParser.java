@@ -86,6 +86,39 @@ public class ProvinceParser {
         return provinces;
     }
 
+    public static ArrayList<combatEngine.Edge> parseEdges(Reader reader) throws IOException {
+        ArrayList<combatEngine.Edge> edges = new ArrayList<>();
+        BufferedReader br = new BufferedReader(reader);
+        String line;
+
+        while ((line = br.readLine()) != null) {
+            if (line.trim().isEmpty() || line.startsWith("ID,")) {
+                continue;
+            }
+
+            String[] tokens = line.split(",");
+
+            if (tokens.length < 3) {
+                System.err.println("Skipping malformed line: " + line);
+                continue;
+            }
+
+            try {
+                int fromID = Integer.parseInt(tokens[0].trim());
+                int toID = Integer.parseInt(tokens[1].trim());
+                int weight = Integer.parseInt(tokens[2].trim());
+
+                combatEngine.Edge edge = new combatEngine.Edge(fromID, toID, weight);
+                edges.add(edge);
+
+            } catch (NumberFormatException e) {
+                System.err.println("Number format error in line: " + line);
+            }
+        }
+
+        return edges;
+    }
+
     public static ArrayList<Country> parseCountries(Reader reader) throws IOException {
         ArrayList<Country> countries = new ArrayList<>();
         BufferedReader br = new BufferedReader(reader);
