@@ -73,12 +73,12 @@ import org.w3c.dom.svg.SVGDocument;
 public class SVGMapViewer {
 
     private Element selectedElement = null;
-    private static ArrayList<Province> provinceList = new ArrayList<>();
-    private static ArrayList<Country> countryList = new ArrayList<>();
+    public static ArrayList<Province> provinceList = new ArrayList<>();
+    public static ArrayList<Country> countryList = new ArrayList<>();
 
     private static ArrayList<Entity> technologyList = new ArrayList<>();
     private static HashMap<String, Entity> entityMap = new HashMap<>();
-    private final File dataDir = new File(System.getProperty("user.home"), "MinaturiaData");
+    public static final File dataDir = new File(System.getProperty("user.home"), "MinaturiaData");
     private final String[] SvgFiles = new String[]{"Map Layer", "Economy Layer", "Production Layer", "Research Layer", "Squad Design Layer"};
 
     private static HashMap<String, JSVGCanvas> canvasMap = new HashMap<>();
@@ -108,6 +108,7 @@ public class SVGMapViewer {
         copyResourceToFile("Minaturia Countries.csv", new File(dataDir, "Minaturia Countries.csv"));
         copyResourceToFile("Minaturia Provinces.csv", new File(dataDir, "Minaturia Provinces.csv"));
         copyResourceToFile("Minaturia Technology.csv", new File(dataDir, "Minaturia Technology.csv"));
+        copyResourceToFile("Minaturia Edges.csv", new File(dataDir, "Minaturia Technology.csv"));
         copyResourceToFile("Map Layer.svg", new File(dataDir, "Map Layer.svg"));
         copyResourceToFile("Production Layer.svg", new File(dataDir, "Production Layer.svg"));
         copyResourceToFile("Research Layer.svg", new File(dataDir, "Research Layer.svg"));

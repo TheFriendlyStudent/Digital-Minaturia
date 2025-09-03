@@ -1,5 +1,9 @@
 package org.whogames.digitalminaturia;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class combatEngine {
@@ -17,6 +21,19 @@ public class combatEngine {
             this.destination = destination;
             this.weight = weight;
         }
+    }
+
+    public combatEngine() {
+        try {
+            this.edges = ProvinceParser.parseEdges(new FileReader(new File(SVGMapViewer.dataDir, "Minaturia Edges.csv")));
+        } catch (FileNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        this.provinces = SVGMapViewer.provinceList;
     }
 
     public void simulateBattle(Battalion attacker, Battalion defender) {
