@@ -96,6 +96,8 @@ public class SVGMapViewer {
     private final double zoomMin = 0.5;   // 50% min zoom
     private final double zoomMax = 3.0;   // 300% max zoom
 
+    private combatEngine combatSim = null;
+
     public void createAndShowGUI() throws Exception {
 
     // Ensure the data folder exists
@@ -108,7 +110,7 @@ public class SVGMapViewer {
         copyResourceToFile("Minaturia Countries.csv", new File(dataDir, "Minaturia Countries.csv"));
         copyResourceToFile("Minaturia Provinces.csv", new File(dataDir, "Minaturia Provinces.csv"));
         copyResourceToFile("Minaturia Technology.csv", new File(dataDir, "Minaturia Technology.csv"));
-        copyResourceToFile("Minaturia Edges.csv", new File(dataDir, "Minaturia Technology.csv"));
+        copyResourceToFile("Minaturia Edges.csv", new File(dataDir, "Minaturia Edges.csv"));
         copyResourceToFile("Map Layer.svg", new File(dataDir, "Map Layer.svg"));
         copyResourceToFile("Production Layer.svg", new File(dataDir, "Production Layer.svg"));
         copyResourceToFile("Research Layer.svg", new File(dataDir, "Research Layer.svg"));
@@ -122,6 +124,7 @@ public class SVGMapViewer {
     countryList = ProvinceParser.parseCountries(new FileReader(new File(dataDir, "Minaturia Countries.csv")));
     provinceList = ProvinceParser.parseProvinces(new FileReader(new File(dataDir, "Minaturia Provinces.csv")));
     technologyList = ProvinceParser.parseItems(new FileReader(new File(dataDir, "Minaturia Technology.csv")));
+    combatSim = new combatEngine();
 
     for (Entity tech : technologyList) {
         entityMap.put(tech.getName(), tech);
