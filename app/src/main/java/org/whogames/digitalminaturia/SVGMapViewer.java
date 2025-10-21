@@ -20,6 +20,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Point2D;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
@@ -41,6 +42,7 @@ import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JSlider;
 import javax.swing.JSpinner;
@@ -75,18 +77,25 @@ public class SVGMapViewer {
     private Element selectedElement = null;
     public static ArrayList<Province> provinceList = new ArrayList<>();
     public static ArrayList<Country> countryList = new ArrayList<>();
-
     private static ArrayList<Entity> technologyList = new ArrayList<>();
+
     private static HashMap<String, Entity> entityMap = new HashMap<>();
+
     public static final File dataDir = new File(System.getProperty("user.home"), "MinaturiaData");
     private final String[] SvgFiles = new String[]{"Map Layer", "Economy Layer", "Production Layer", "Research Layer", "Squad Design Layer"};
 
     private static HashMap<String, JSVGCanvas> canvasMap = new HashMap<>();
     private static HashMap<String, JLayeredPane> layeredPaneMap = new HashMap<>();  
 
-    private Province currentProvince = null;
+    private static JFrame frame;
+    private static JPanel cards;
+    private static JPanel infoPanel;
+    private static JPanel topPanel;
+    private static JScrollPane scrollPane;
+    
+    private static Province currentProvince = null;
     private int currentProvinceIndex = -1;
-    private JButton foodInput;
+    private JButton foodInput, createSquad;
     private JSlider fuelSlider;
     private JComboBox<String> resourceSelect;
     private JComboBox<String> techSelect;
@@ -96,274 +105,275 @@ public class SVGMapViewer {
     private final double zoomMin = 0.5;   // 50% min zoom
     private final double zoomMax = 3.0;   // 300% max zoom
 
-    private combatEngine combatSim = null;
+    private final Font consoleFont = new Font("Monospaced", Font.PLAIN, 14);
 
-    public void createAndShowGUI() throws Exception {
+    private static combatEngine combatSim = null;
 
-    // Ensure the data folder exists
-    if (!dataDir.exists()) {
-        dataDir.mkdirs();
+    public SVGMapViewer() {
+
     }
 
-    // Copy default CSVs from resources on first launch
-    try {
-        copyResourceToFile("Minaturia Countries.csv", new File(dataDir, "Minaturia Countries.csv"));
-        copyResourceToFile("Minaturia Provinces.csv", new File(dataDir, "Minaturia Provinces.csv"));
-        copyResourceToFile("Minaturia Technology.csv", new File(dataDir, "Minaturia Technology.csv"));
-        copyResourceToFile("Minaturia Edges.csv", new File(dataDir, "Minaturia Edges.csv"));
-        copyResourceToFile("Map Layer.svg", new File(dataDir, "Map Layer.svg"));
-        copyResourceToFile("Production Layer.svg", new File(dataDir, "Production Layer.svg"));
-        copyResourceToFile("Research Layer.svg", new File(dataDir, "Research Layer.svg"));
-        copyResourceToFile("Economy Layer.svg", new File(dataDir, "Economy Layer.svg"));
-        copyResourceToFile("Squad Design Layer.svg", new File(dataDir, "Squad Design Layer.svg"));
-    } catch (IOException e) {
-        e.printStackTrace();
-        showStyledDialog("Failed to load game data files: " + e.getMessage());
-    }
-
-    countryList = ProvinceParser.parseCountries(new FileReader(new File(dataDir, "Minaturia Countries.csv")));
-    provinceList = ProvinceParser.parseProvinces(new FileReader(new File(dataDir, "Minaturia Provinces.csv")));
-    technologyList = ProvinceParser.parseItems(new FileReader(new File(dataDir, "Minaturia Technology.csv")));
-    combatSim = new combatEngine();
-
-    for (Entity tech : technologyList) {
-        entityMap.put(tech.getName(), tech);
-    }
-    for (Country country : countryList) {
-        File invFile = new File(dataDir, country.getName() + " Inventory.csv");
-        if (!invFile.exists()) {
-            invFile.createNewFile();
+    public void loadResources() throws FileNotFoundException, IOException {
+        // Ensure the data folder exists
+        if (!dataDir.exists()) {
+            dataDir.mkdirs();
         }
-        ProvinceParser.parseInventory(new FileReader(invFile), country, entityMap);
+
+        // Copy default CSVs from resources on first launch
+        try {
+            copyResourceToFile("Minaturia Countries.csv", new File(dataDir, "Minaturia Countries.csv"));
+            copyResourceToFile("Minaturia Provinces.csv", new File(dataDir, "Minaturia Provinces.csv"));
+            copyResourceToFile("Minaturia Technology.csv", new File(dataDir, "Minaturia Technology.csv"));
+            copyResourceToFile("Minaturia Edges.csv", new File(dataDir, "Minaturia Edges.csv"));
+            copyResourceToFile("Map Layer.svg", new File(dataDir, "Map Layer.svg"));
+            copyResourceToFile("Production Layer.svg", new File(dataDir, "Production Layer.svg"));
+            copyResourceToFile("Research Layer.svg", new File(dataDir, "Research Layer.svg"));
+            copyResourceToFile("Economy Layer.svg", new File(dataDir, "Economy Layer.svg"));
+            copyResourceToFile("Squad Design Layer.svg", new File(dataDir, "Squad Design Layer.svg"));
+        } catch (IOException e) {
+            e.printStackTrace();
+            showStyledDialog("Failed to load game data files: " + e.getMessage());
+        }
+
+        countryList = ProvinceParser.parseCountries(new FileReader(new File(dataDir, "Minaturia Countries.csv")));
+        provinceList = ProvinceParser.parseProvinces(new FileReader(new File(dataDir, "Minaturia Provinces.csv")));
+        technologyList = ProvinceParser.parseItems(new FileReader(new File(dataDir, "Minaturia Technology.csv")));
+        combatSim = new combatEngine();
+
+        for (Entity tech : technologyList) {
+            entityMap.put(tech.getName(), tech);
+        }
+        for (Country country : countryList) {
+            File invFile = new File(dataDir, country.getName() + " Inventory.csv");
+            if (!invFile.exists()) {
+                invFile.createNewFile();
+            }
+            ProvinceParser.parseInventory(new FileReader(invFile), country, entityMap);
+        }
+
     }
 
-    JFrame frame = new JFrame("Minaturia");
-    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    frame.setLayout(new BorderLayout());
-     // Setup layered pane for svg and overlays
-    ToolTipManager.sharedInstance().setInitialDelay(100);
-    ToolTipManager.sharedInstance().setDismissDelay(4000);
-    UIManager.put("ToolTip.background", Color.BLACK);
-    UIManager.put("ToolTip.foreground", Color.WHITE);
-    UIManager.put("ToolTip.font", new Font("Monospaced", Font.PLAIN, 12));
-    UIManager.put("ToolTip.border", BorderFactory.createLineBorder(Color.WHITE));
+    private void initializeFrame() {
+        frame = new JFrame("Minaturia");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setLayout(new BorderLayout());
+        frame.setResizable(true);
+    }
 
-    JPanel cards = new JPanel(new CardLayout());
-
-        JScrollPane scrollPane = new JScrollPane(cards); 
+    private JScrollPane createStyledScrollPane(JPanel cards) {
+        JScrollPane scrollPane = new JScrollPane(cards);
         scrollPane.setViewportView(cards);
         scrollPane.setPreferredSize(new Dimension(1000, 625));
- 
         scrollPane.setBackground(Color.BLACK);
-        scrollPane.getVerticalScrollBar().setUI(new BasicScrollBarUI() {
-    @Override
-    protected void configureScrollBarColors() {
-        this.thumbColor = Color.WHITE;
-        this.trackColor = Color.BLACK;
+        
+        configureScrollBar(scrollPane.getVerticalScrollBar());
+        configureScrollBar(scrollPane.getHorizontalScrollBar());
+        
+        scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+        scrollPane.getVerticalScrollBar().setPreferredSize(new Dimension(8, 0));
+        scrollPane.getHorizontalScrollBar().setPreferredSize(new Dimension(0, 8));
+        
+        return scrollPane;
     }
 
-    @Override
-    protected JButton createDecreaseButton(int orientation) {
-        return createInvisibleButton();
-    }
-
-    @Override
-    protected JButton createIncreaseButton(int orientation) {
-        return createInvisibleButton();
-    }
-
-    private JButton createInvisibleButton() {
-        JButton button = new JButton();
-        button.setPreferredSize(new Dimension(0, 0));
-        button.setMinimumSize(new Dimension(0, 0));
-        button.setMaximumSize(new Dimension(0, 0));
-        return button;
-    }
-});
-
-scrollPane.getHorizontalScrollBar().setUI(new BasicScrollBarUI() {
-    @Override
-    protected void configureScrollBarColors() {
-        this.thumbColor = Color.WHITE;
-        this.trackColor = Color.BLACK;
-    }
-
-    @Override
-    protected JButton createDecreaseButton(int orientation) {
-        return createInvisibleButton();
-    }
-
-    @Override
-    protected JButton createIncreaseButton(int orientation) {
-        return createInvisibleButton();
-    }
-
-    private JButton createInvisibleButton() {
-        JButton button = new JButton();
-        button.setPreferredSize(new Dimension(0, 0));
-        button.setMinimumSize(new Dimension(0, 0));
-        button.setMaximumSize(new Dimension(0, 0));
-        return button;
-    }
-});
-
-    scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-    scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
-    scrollPane.getVerticalScrollBar().setPreferredSize(new Dimension(8, 0));
-    scrollPane.getHorizontalScrollBar().setPreferredSize(new Dimension(0, 8));
-
-    JPanel topPanel = new JPanel() {
-        @Override
-        protected void paintComponent(Graphics g) {
-            super.paintComponent(g);
-            g.setColor(new Color(255, 255, 255, 25));
-            for (int y = 0; y < getHeight(); y += 4) {
-                g.drawLine(0, y, getWidth(), y);
+    private void configureScrollBar(JScrollBar bar) {
+        bar.setUI(new BasicScrollBarUI() {
+            @Override
+            protected void configureScrollBarColors() {
+                this.thumbColor = Color.WHITE;
+                this.trackColor = Color.BLACK;
             }
-        }
-    };
-    topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
-    topPanel.setBackground(Color.BLACK);
-    topPanel.setPreferredSize(new Dimension(1920, 100));
-
-    JLabel countryNameLabel = new JLabel("COUNTRY: NONE SELECTED");
-    JLabel capitalLabel = new JLabel("Capital: ");
-    JLabel populationLabel = new JLabel("Population: ");
-
-    JLabel[] labels = {countryNameLabel, capitalLabel, populationLabel};
-    for (JLabel label : labels) {
-        label.setFont(new Font("Monospaced", Font.BOLD, 16));
-        label.setForeground(Color.WHITE);
-        label.setHorizontalAlignment(SwingConstants.LEFT);
-    }
-
-    topPanel.add(countryNameLabel, BorderLayout.WEST);
-    topPanel.add(capitalLabel, BorderLayout.WEST);
-    topPanel.add(populationLabel, BorderLayout.WEST);
- 
-    JPanel buttonPanel = new JPanel() {
-        @Override
-        protected void paintComponent(Graphics g) {
-            super.paintComponent(g);
-            g.setColor(new Color(255, 255, 255, 20));
-            for (int y = 0; y < getHeight(); y += 4) {
-                g.drawLine(0, y, getWidth(), y);
+            @Override
+            protected JButton createDecreaseButton(int orientation) { return createInvisibleButton(); }
+            @Override
+            protected JButton createIncreaseButton(int orientation) { return createInvisibleButton(); }
+            private JButton createInvisibleButton() {
+                JButton button = new JButton();
+                button.setPreferredSize(new Dimension(0,0));
+                button.setMinimumSize(new Dimension(0,0));
+                button.setMaximumSize(new Dimension(0,0));
+                return button;
             }
-        }
-    };
-
-    buttonPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 5));
-    buttonPanel.setPreferredSize(new Dimension(1920, 20));
-    buttonPanel.setBackground(Color.BLACK);
-
-    Font buttonFont = new Font("Monospaced", Font.BOLD, 12);
-
-    JButton mapButton = new JButton("Map");
-    JButton economyButton = new JButton("Economy");
-    JButton productionButton = new JButton("Production");
-    JButton researchButton = new JButton("Research");
-    JButton squadButton = new JButton("Squad Design");
-
-    JButton[] buttons = {mapButton, economyButton, productionButton, researchButton, squadButton};
-    for (JButton btn : buttons) {
-        styleButton(btn, buttonFont);
-        buttonPanel.add(btn);
+        });
     }
 
-    topPanel.add(buttonPanel);
-    frame.add(topPanel, BorderLayout.NORTH);
+    private void setToolTipText(){
+        ToolTipManager.sharedInstance().setInitialDelay(100);
+        ToolTipManager.sharedInstance().setDismissDelay(4000);
+        UIManager.put("ToolTip.background", Color.BLACK);
+        UIManager.put("ToolTip.foreground", Color.WHITE);
+        UIManager.put("ToolTip.font", new Font("Monospaced", Font.PLAIN, 12));
+        UIManager.put("ToolTip.border", BorderFactory.createLineBorder(Color.WHITE));
+    }
 
-    JPanel infoPanel = new JPanel() {
-        @Override
-        protected void paintComponent(Graphics g) {
-            super.paintComponent(g);
-            g.setColor(new Color(255, 255, 255, 20));
-            for (int y = 0; y < getHeight(); y += 4) {
-                g.drawLine(0, y, getWidth(), y);
+    public JPanel createTopPanel(){
+        JPanel topPanel = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                g.setColor(new Color(255, 255, 255, 25));
+                for (int y = 0; y < getHeight(); y += 4) {
+                    g.drawLine(0, y, getWidth(), y);
+                }
             }
+        };
+
+        topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
+        topPanel.setBackground(Color.BLACK);
+        topPanel.setPreferredSize(new Dimension(1920, 100));
+
+        JLabel countryNameLabel = new JLabel("COUNTRY: NONE SELECTED");
+        JLabel capitalLabel = new JLabel("Capital: ");
+        JLabel populationLabel = new JLabel("Population: ");
+
+        JLabel[] labels = {countryNameLabel, capitalLabel, populationLabel};
+        for (JLabel label : labels) {
+            label.setFont(new Font("Monospaced", Font.BOLD, 16));
+            label.setForeground(Color.WHITE);
+            label.setHorizontalAlignment(SwingConstants.LEFT);
+            topPanel.add(label, BorderLayout.WEST);
         }
-    };
-    infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
-    infoPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-    infoPanel.setPreferredSize(new Dimension(300, 980));
-    infoPanel.setBackground(Color.BLACK);
 
-    Font font = new Font("Monospaced", Font.PLAIN, 14);
+        JPanel buttonPanel = createButtonPanel();
 
-    JTextField nameField = createBlinkingCaretField(10);
-    JTextField languageField = createBlinkingCaretField(10);
-    JTextField populationField = createBlinkingCaretField(10);
-    JTextField terrainField = createBlinkingCaretField(10);
-    JTextField tierField = createBlinkingCaretField(10);
-    JTextField cityTypeField = createBlinkingCaretField(10);
-    JTextField budget1Field = createBlinkingCaretField(10);
-    JTextField budget2Field = createBlinkingCaretField(10);
-    JButton updateButton = new JButton("Save Changes");
+        topPanel.add(buttonPanel);
 
-    JTextField[] fields = {
-        nameField, languageField, populationField,
-        terrainField, tierField, cityTypeField, budget1Field, budget2Field
-    };
-
-    for (JTextField field : fields) {
-        styleTextField(field, font);
+        return topPanel;
     }
 
-    styleButton(updateButton, font);
+    private JPanel createButtonPanel() {
+        JPanel buttonPanel = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                g.setColor(new Color(255, 255, 255, 20));
+                for (int y = 0; y < getHeight(); y += 4) {
+                    g.drawLine(0, y, getWidth(), y);
+                }
+            }
+        };
 
-    addField(infoPanel, "Name:", nameField, font);
-    addField(infoPanel, "Language:", languageField, font);
-    addField(infoPanel, "Population:", populationField, font);
-    addField(infoPanel, "Terrain:", terrainField, font);
-    addField(infoPanel, "Tier:", tierField, font);
-    addField(infoPanel, "City Type:", cityTypeField, font);
-    addField(infoPanel, "Food Production:", budget1Field, font);
-    addField(infoPanel, "Fuel Production:", budget2Field, font);
-    infoPanel.add(Box.createRigidArea(new Dimension(0, 5)));
-    infoPanel.add(updateButton);
+        buttonPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 5));
+        buttonPanel.setPreferredSize(new Dimension(1920, 20));
+        buttonPanel.setBackground(Color.BLACK);
 
-    Font consoleFont = new Font("Monospaced", Font.PLAIN, 14);
+        JButton mapButton = new JButton("Map");
+        JButton economyButton = new JButton("Economy");
+        JButton productionButton = new JButton("Production");
+        JButton researchButton = new JButton("Research");
+        JButton squadButton = new JButton("Squad Design");
 
-    foodInput = new JButton("Order");
-    foodInput.setBackground(Color.BLACK);
-    foodInput.setForeground(Color.WHITE);
-    foodInput.setFont(consoleFont);
-    foodInput.setBorder(BorderFactory.createLineBorder(Color.WHITE));
+        JButton[] buttons = {mapButton, economyButton, productionButton, researchButton, squadButton};
+        for (JButton btn : buttons) {
+            styleButton(btn);
+            buttonPanel.add(btn);
+        }
 
-    fuelSlider = new JSlider(0, 1000, 300);
-    fuelSlider.setBackground(Color.BLACK);
-    fuelSlider.setForeground(Color.WHITE);
-    fuelSlider.setFont(consoleFont);
-    fuelSlider.setPaintTicks(true);
-    fuelSlider.setPaintLabels(true);
-    fuelSlider.setMajorTickSpacing(250);
-    fuelSlider.setMinorTickSpacing(50);
+        mapButton.addActionListener(e -> {
+            CardLayout c = (CardLayout)cards.getLayout();
+            c.show(cards, "Map Layer");
+        });
+        economyButton.addActionListener(e -> {
+            CardLayout c = (CardLayout)cards.getLayout();
+            c.show(cards, "Economy Layer");
+        });
+        productionButton.addActionListener(e -> {
+            CardLayout c = (CardLayout)cards.getLayout();
+            c.show(cards, "Production Layer");
+        });
+        researchButton.addActionListener(e -> {
+            CardLayout c = (CardLayout)cards.getLayout();
+            c.show(cards, "Research Layer");
+        });
+        squadButton.addActionListener(e -> {
+            CardLayout c = (CardLayout)cards.getLayout();
+            c.show(cards, "Squad Design Layer");
+        });
 
-    resourceSelect = new JComboBox<>(new String[]{"Food", "Fuel", "Iron", "Steel"});
-    resourceSelect.setBackground(Color.BLACK);
-    resourceSelect.setForeground(Color.WHITE);
-    resourceSelect.setFont(consoleFont);
-    resourceSelect.setBorder(BorderFactory.createLineBorder(Color.WHITE));
+        return buttonPanel;
+    }
 
-    String[] technologies = new String[Ammunition.getTypes().length + Vehicle.getTypes().length + Firearm.getTypes().length];
-    System.arraycopy(Ammunition.getTypes(), 0, technologies, 0, Ammunition.getTypes().length);
-    System.arraycopy(Firearm.getTypes(), 0, technologies, (Ammunition.getTypes().length), Firearm.getTypes().length);
-    System.arraycopy(Vehicle.getTypes(), 0, technologies, (Ammunition.getTypes().length)+(Firearm.getTypes().length), Vehicle.getTypes().length);
+    private void styleComboBox(JComboBox<?> comboBox) {
+        comboBox.setBackground(Color.BLACK);
+        comboBox.setForeground(Color.WHITE);
+        comboBox.setFont(consoleFont);
+        comboBox.setBorder(BorderFactory.createLineBorder(Color.WHITE));
+    }
+    
+    private JPanel createInfoPanel(){
+        JPanel infoPanel = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                g.setColor(new Color(255, 255, 255, 20));
+                for (int y = 0; y < getHeight(); y += 4) {
+                    g.drawLine(0, y, getWidth(), y);
+                }
+            }
+        };
+        
+        infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
+        infoPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        infoPanel.setPreferredSize(new Dimension(300, 980));
+        infoPanel.setBackground(Color.BLACK);
 
-    techSelect = new JComboBox<>(technologies);
-    techSelect.setBackground(Color.BLACK);
-    techSelect.setForeground(Color.WHITE);
-    techSelect.setFont(consoleFont);
-    techSelect.setBorder(BorderFactory.createLineBorder(Color.WHITE));
+        JTextField nameField = null, languageField = null, populationField = null, terrainField = null, tierField = null, 
+        cityTypeField = null, budget1Field = null, budget2Field = null;
 
-    JButton createSquad = new JButton("New Squad");
-    createSquad.setBackground(Color.BLACK);
-    createSquad.setForeground(Color.WHITE);
-    createSquad.setFont(consoleFont);
-    createSquad.setBorder(BorderFactory.createLineBorder(Color.WHITE));
+        JTextField[] fields = {
+            nameField, languageField, populationField,
+            terrainField, tierField, cityTypeField, budget1Field, budget2Field
+        };
 
-    cards.setPreferredSize(new Dimension(2000, 1250));
-    for (String svgFi : SvgFiles){
+        for (JTextField field : fields) {
+            field = createBlinkingCaretField(10);
+            styleTextField(field);
+        }
+
+        JButton updateButton = new JButton("Save Changes");
+        styleButton(updateButton);
+
+        updateButton.addActionListener(e -> {
+            if (currentProvince != null && currentProvinceIndex != -1) {
+                try {
+                    currentProvince.setName(nameField.getText());
+                    currentProvince.setLanguage(languageField.getText());
+                    currentProvince.setPopulation(Integer.parseInt(populationField.getText()));
+                    currentProvince.setTerrain(terrainField.getText());
+                    currentProvince.setTier(Integer.parseInt(tierField.getText()));
+                    currentProvince.setCityType(cityTypeField.getText());
+                    currentProvince.setBudget1(Long.parseLong(budget1Field.getText()));
+                    currentProvince.setBudget2(Long.parseLong(budget2Field.getText()));
+
+                ProvinceParser.writeProvincesToCSV(provinceList, new File(dataDir, "Minaturia Provinces.csv").getAbsolutePath());
+
+                    JOptionPane.showMessageDialog(frame, "Changes saved.");
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    JOptionPane.showMessageDialog(frame, "Error: " + ex.getMessage());
+                }
+            } else {
+                System.out.println("No province selected.");
+            }
+        });
+
+        addField(infoPanel, "Name:", nameField, consoleFont);
+        addField(infoPanel, "Language:", languageField, consoleFont);
+        addField(infoPanel, "Population:", populationField, consoleFont);
+        addField(infoPanel, "Terrain:", terrainField, consoleFont);
+        addField(infoPanel, "Tier:", tierField, consoleFont);
+        addField(infoPanel, "City Type:", cityTypeField, consoleFont);
+        addField(infoPanel, "Food Production:", budget1Field, consoleFont);
+        addField(infoPanel, "Fuel Production:", budget2Field, consoleFont);
+        infoPanel.add(Box.createRigidArea(new Dimension(0, 5)));
+        infoPanel.add(updateButton);
+
+        return infoPanel;
+    }
+
+    private void setZoom(JScrollPane scrollPane) throws IOException {
+        for (String svgFi : SvgFiles){
 
             File s = new File(dataDir, svgFi+".svg");
             String parser = XMLResourceDescriptor.getXMLParserClassName();
@@ -391,36 +401,117 @@ scrollPane.getHorizontalScrollBar().setUI(new BasicScrollBarUI() {
             layeredPaneMap.put(svgFi, jlp);
 
             cards.add(jlp, svgFi);
-    } 
+        }
 
-    layeredPaneMap.get("Production Layer").add(fuelSlider, JLayeredPane.PALETTE_LAYER);
-    layeredPaneMap.get("Production Layer").add(resourceSelect, JLayeredPane.PALETTE_LAYER);
-    layeredPaneMap.get("Production Layer").add(foodInput, JLayeredPane.PALETTE_LAYER);
+        cards.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
 
-    layeredPaneMap.get("Research Layer").add(techSelect, JLayeredPane.PALETTE_LAYER);
+                Dimension size = scrollPane.getViewport().getExtentSize();
 
-    layeredPaneMap.get("Squad Design Layer").add(createSquad, JLayeredPane.PALETTE_LAYER);
+                // Position overlay controls relative to panel size
+                int x = (int) (size.width * 0.05);
+                int y = (int) (size.height * 0.08);
+                int width = 180;
+                int height = 30;
+                int sliderHeight = 50;
 
-        mapButton.addActionListener(e -> {
-            CardLayout c = (CardLayout)cards.getLayout();
-            c.show(cards, "Map Layer");
+                // Increased spacing for better visual separation
+                int spacing = 40;
+                int xSpacing = width + 30;
+
+                resourceSelect.setBounds(x, y, width, height);
+                techSelect.setBounds(x, y, width, height);
+                fuelSlider.setBounds(x + xSpacing, y, width + 70, sliderHeight);
+                foodInput.setBounds(x, y + spacing, width, height);
+                createSquad.setBounds(x, y, width, height);
+                System.out.println("layeredPane preferred size: " + cards.getPreferredSize());
+                System.out.println("scroll view size: " + scrollPane.getViewport().getViewSize());
+
+                // When zoom changes or size changes:
+            }
         });
-        economyButton.addActionListener(e -> {
-            CardLayout c = (CardLayout)cards.getLayout();
-            c.show(cards, "Economy Layer");
-        });
-        productionButton.addActionListener(e -> {
-            CardLayout c = (CardLayout)cards.getLayout();
-            c.show(cards, "Production Layer");
-        });
-        researchButton.addActionListener(e -> {
-            CardLayout c = (CardLayout)cards.getLayout();
-            c.show(cards, "Research Layer");
-        });
-        squadButton.addActionListener(e -> {
-            CardLayout c = (CardLayout)cards.getLayout();
-            c.show(cards, "Squad Design Layer");
-        });
+
+        for (Map.Entry<String, JSVGCanvas> entry : canvasMap.entrySet()) {
+            JSVGCanvas canvas = entry.getValue();
+
+            canvas.addMouseWheelListener((MouseWheelEvent e) -> {
+                int notches = e.getWheelRotation();
+                if (notches < 0) {
+                    zoomFactor = Math.min(zoomFactor + zoomStep, zoomMax);
+                } else {
+                    zoomFactor = Math.max(zoomFactor - zoomStep, zoomMin);
+                }
+
+                Point mousePoint = e.getPoint();
+                AffineTransform currentTransform = canvas.getRenderingTransform();
+
+                try {
+                    Point2D mouseInUserSpace = currentTransform.inverseTransform(mousePoint, null);
+                    AffineTransform newTransform = new AffineTransform();
+                    newTransform.translate(mousePoint.getX(), mousePoint.getY());
+                    newTransform.scale(zoomFactor, zoomFactor);
+                    newTransform.translate(-mouseInUserSpace.getX(), -mouseInUserSpace.getY());
+
+                    canvas.setRenderingTransform(newTransform, true);
+
+                } catch (NoninvertibleTransformException ex) {
+                    ex.printStackTrace();
+                }
+            });
+        } 
+    }
+
+    public void createAndShowGUI() throws Exception {
+
+        loadResources();
+        setToolTipText();
+        initializeFrame();
+
+        cards = new JPanel(new CardLayout());
+        
+        cards.setPreferredSize(new Dimension(2000, 1250));
+
+        topPanel = createTopPanel();
+        infoPanel = createInfoPanel();
+        scrollPane = createStyledScrollPane(cards); 
+        
+        setZoom(scrollPane);
+
+        frame.add(topPanel, BorderLayout.NORTH);
+        frame.add(infoPanel, BorderLayout.WEST);
+
+        foodInput = new JButton("Order");
+        styleButton(foodInput);
+
+        fuelSlider = new JSlider(0, 1000, 300);
+        fuelSlider.setBackground(Color.BLACK);
+        fuelSlider.setForeground(Color.WHITE);
+        fuelSlider.setFont(consoleFont);
+        fuelSlider.setPaintTicks(true);
+        fuelSlider.setPaintLabels(true);
+        fuelSlider.setMajorTickSpacing(250);
+        fuelSlider.setMinorTickSpacing(50);
+
+        resourceSelect = new JComboBox<>(new String[]{"Food", "Fuel", "Iron", "Steel"});
+        styleComboBox(resourceSelect);
+
+        String[] technologies = new String[Ammunition.getTypes().length + Vehicle.getTypes().length + Firearm.getTypes().length];
+        System.arraycopy(Ammunition.getTypes(), 0, technologies, 0, Ammunition.getTypes().length);
+        System.arraycopy(Firearm.getTypes(), 0, technologies, (Ammunition.getTypes().length), Firearm.getTypes().length);
+        System.arraycopy(Vehicle.getTypes(), 0, technologies, (Ammunition.getTypes().length)+(Firearm.getTypes().length), Vehicle.getTypes().length);
+
+        techSelect = new JComboBox<>(technologies);
+        styleComboBox(techSelect);
+
+        createSquad = new JButton("New Squad");
+        styleButton(createSquad);
+
+        layeredPaneMap.get("Production Layer").add(fuelSlider, JLayeredPane.PALETTE_LAYER);
+        layeredPaneMap.get("Production Layer").add(resourceSelect, JLayeredPane.PALETTE_LAYER);
+        layeredPaneMap.get("Production Layer").add(foodInput, JLayeredPane.PALETTE_LAYER);
+        layeredPaneMap.get("Research Layer").add(techSelect, JLayeredPane.PALETTE_LAYER);
+        layeredPaneMap.get("Squad Design Layer").add(createSquad, JLayeredPane.PALETTE_LAYER);
 
         createSquad.addActionListener(e -> {
             createSquadDialog();
@@ -510,16 +601,15 @@ scrollPane.getHorizontalScrollBar().setUI(new BasicScrollBarUI() {
                                 Country country = getCountryByName(currentProvince.getCountry());
 
                                 if (country != null) {
-                                    countryNameLabel.setText("COUNTRY: " + country.getName().toUpperCase());
-                                    capitalLabel.setText("Capital: " + country.getCapital());
-                                    populationLabel.setText("Population: " + country.getPopulation());
+                                    updateTopPanel(country.getName().toUpperCase(), 
+                                    country.getCapital(), "" + country.getPopulation());
 
                                     updateResourceOptionsForCountry(country.getName());
                                     updateProductionLayer(country);
                                 } else {
-                                    countryNameLabel.setText("COUNTRY: " + currentProvince.getCountry().toUpperCase());
-                                    capitalLabel.setText("Capital: Unknown");
-                                    populationLabel.setText("Population: Unknown");
+
+                                    updateTopPanel(currentProvince.getCountry().toUpperCase(), 
+                                    "Unknown", "Unknown");
 
                                     updateResourceOptionsForCountry(null);
                                 }
@@ -539,102 +629,15 @@ scrollPane.getHorizontalScrollBar().setUI(new BasicScrollBarUI() {
             }
         });
 
-        // Update button action as before...
-        updateButton.addActionListener(e -> {
-            if (currentProvince != null && currentProvinceIndex != -1) {
-                try {
-                    currentProvince.setName(nameField.getText());
-                    currentProvince.setLanguage(languageField.getText());
-                    currentProvince.setPopulation(Integer.parseInt(populationField.getText()));
-                    currentProvince.setTerrain(terrainField.getText());
-                    currentProvince.setTier(Integer.parseInt(tierField.getText()));
-                    currentProvince.setCityType(cityTypeField.getText());
-                    currentProvince.setBudget1(Long.parseLong(budget1Field.getText()));
-                    currentProvince.setBudget2(Long.parseLong(budget2Field.getText()));
-
-                ProvinceParser.writeProvincesToCSV(provinceList, new File(dataDir, "Minaturia Provinces.csv").getAbsolutePath());
-
-                    JOptionPane.showMessageDialog(frame, "Changes saved.");
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                    JOptionPane.showMessageDialog(frame, "Error: " + ex.getMessage());
-                }
-            } else {
-                System.out.println("No province selected.");
-            }
-        });
-
-        frame.add(infoPanel, BorderLayout.WEST);
         frame.add(scrollPane, BorderLayout.CENTER);
 
-        // *** Make frame resizable ***
-        frame.setResizable(true);
-
-        // *** Add component listener to reposition overlays on resize ***
-        cards.addComponentListener(new ComponentAdapter() {
-            @Override
-            public void componentResized(ComponentEvent e) {
-
-                Dimension size = scrollPane.getViewport().getExtentSize();
-
-                // Position overlay controls relative to panel size
-                int x = (int) (size.width * 0.05);
-                int y = (int) (size.height * 0.08);
-                int width = 180;
-                int height = 30;
-                int sliderHeight = 50;
-
-                // Increased spacing for better visual separation
-                int spacing = 40;
-                int xSpacing = width + 30;
-
-                resourceSelect.setBounds(x, y, width, height);
-                techSelect.setBounds(x, y, width, height);
-                fuelSlider.setBounds(x + xSpacing, y, width + 70, sliderHeight);
-                foodInput.setBounds(x, y + spacing, width, height);
-                createSquad.setBounds(x, y, width, height);
-                System.out.println("layeredPane preferred size: " + cards.getPreferredSize());
-                System.out.println("scroll view size: " + scrollPane.getViewport().getViewSize());
-
-                // When zoom changes or size changes:
-            }
-        });
-
-for (Map.Entry<String, JSVGCanvas> entry : canvasMap.entrySet()) {
-    JSVGCanvas canvas = entry.getValue();
-
-    canvas.addMouseWheelListener((MouseWheelEvent e) -> {
-        int notches = e.getWheelRotation();
-        if (notches < 0) {
-            zoomFactor = Math.min(zoomFactor + zoomStep, zoomMax);
-        } else {
-            zoomFactor = Math.max(zoomFactor - zoomStep, zoomMin);
-        }
-
-        Point mousePoint = e.getPoint();
-        AffineTransform currentTransform = canvas.getRenderingTransform();
-
-        try {
-            Point2D mouseInUserSpace = currentTransform.inverseTransform(mousePoint, null);
-            AffineTransform newTransform = new AffineTransform();
-            newTransform.translate(mousePoint.getX(), mousePoint.getY());
-            newTransform.scale(zoomFactor, zoomFactor);
-            newTransform.translate(-mouseInUserSpace.getX(), -mouseInUserSpace.getY());
-
-            canvas.setRenderingTransform(newTransform, true);
-
-        } catch (NoninvertibleTransformException ex) {
-            ex.printStackTrace();
-        }
-    });
-}
         frame.pack();
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
 
     }
 
-private void attachTooltipListeners(Element el, String tooltipText) {
+    private void attachTooltipListeners(Element el, String tooltipText) {
     EventTarget target = (EventTarget) el;
 
     target.addEventListener("mouseover", evt -> {
@@ -659,6 +662,16 @@ private void attachTooltipListeners(Element el, String tooltipText) {
     }, false);
 }
 
+    private void updateTopPanel(String countryName, String capital, String population) {
+        JLabel countryNameLabel = (JLabel) topPanel.getComponent(0);
+        JLabel capitalLabel = (JLabel) topPanel.getComponent(1);
+        JLabel populationLabel = (JLabel) topPanel.getComponent(2);
+
+        countryNameLabel.setText("COUNTRY: " + countryName.toUpperCase());
+        capitalLabel.setText("Capital: " + capital);
+        populationLabel.setText("Population: " + population);
+
+    }
 
     private void updateInventoryForCountry(String country) {
         if (country == null) {
@@ -757,23 +770,23 @@ private void attachTooltipListeners(Element el, String tooltipText) {
         canvasMap.get("Production Layer").repaint();
     }
 
-private void styleButton(JButton button, Font font) {
-    button.setFont(font);
-    button.setBackground(Color.BLACK);
-    button.setForeground(Color.WHITE);
-    button.setFocusPainted(false);
-    button.setBorder(BorderFactory.createLineBorder(Color.WHITE));
-}
+    private void styleButton(JButton button) {
+        button.setFont(consoleFont);
+        button.setBackground(Color.BLACK);
+        button.setForeground(Color.WHITE);
+        button.setFocusPainted(false);
+        button.setBorder(BorderFactory.createLineBorder(Color.WHITE));
+    }
 
-private void styleTextField(JTextField field, Font font) {
-    field.setFont(font);
-    field.setBackground(Color.BLACK);
-    field.setForeground(Color.WHITE);
-    field.setCaretColor(Color.WHITE);
-    field.setBorder(BorderFactory.createLineBorder(Color.WHITE));
-}
+    private void styleTextField(JTextField field) {
+        field.setFont(consoleFont);
+        field.setBackground(Color.BLACK);
+        field.setForeground(Color.WHITE);
+        field.setCaretColor(Color.WHITE);
+        field.setBorder(BorderFactory.createLineBorder(Color.WHITE));
+    }
 
-private JTextField createBlinkingCaretField(int columns) {
+    private JTextField createBlinkingCaretField(int columns) {
     JTextField field = new JTextField(columns);
     Caret caret = new DefaultCaret() {
         @Override
@@ -791,28 +804,28 @@ private JTextField createBlinkingCaretField(int columns) {
     return field;
 }
 
-private void showStyledDialog(String message) {
-    JTextArea textArea = new JTextArea(message);
-    textArea.setFont(new Font("Monospaced", Font.PLAIN, 14));
-    textArea.setBackground(Color.BLACK);
-    textArea.setForeground(Color.WHITE);
-    textArea.setEditable(false);
-    textArea.setBorder(BorderFactory.createLineBorder(Color.WHITE));
-    
-    // Create the JOptionPane with the text area as message component
-    JOptionPane pane = new JOptionPane(textArea, JOptionPane.INFORMATION_MESSAGE);
-    
-    // Create a dialog from the JOptionPane
-    JDialog dialog = pane.createDialog(message);
-    
-    // Set black background for dialog content pane
-    dialog.getContentPane().setBackground(Color.BLACK);
-    
-    // Recursively set background and foreground for all components inside dialog
-    setColorsRecursive(dialog.getContentPane(), Color.BLACK, Color.WHITE);
-    
-    dialog.setVisible(true);
-}
+    private void showStyledDialog(String message) {
+        JTextArea textArea = new JTextArea(message);
+        textArea.setFont(new Font("Monospaced", Font.PLAIN, 14));
+        textArea.setBackground(Color.BLACK);
+        textArea.setForeground(Color.WHITE);
+        textArea.setEditable(false);
+        textArea.setBorder(BorderFactory.createLineBorder(Color.WHITE));
+        
+        // Create the JOptionPane with the text area as message component
+        JOptionPane pane = new JOptionPane(textArea, JOptionPane.INFORMATION_MESSAGE);
+        
+        // Create a dialog from the JOptionPane
+        JDialog dialog = pane.createDialog(message);
+        
+        // Set black background for dialog content pane
+        dialog.getContentPane().setBackground(Color.BLACK);
+        
+        // Recursively set background and foreground for all components inside dialog
+        setColorsRecursive(dialog.getContentPane(), Color.BLACK, Color.WHITE);
+        
+        dialog.setVisible(true);
+    }
 
     public static Province getProvinceById(int fromID) {
         for (Province province : provinceList) {
@@ -823,7 +836,7 @@ private void showStyledDialog(String message) {
         return null;
     }
 
-private void createSquadDialog() {
+    private void createSquadDialog() {
     
     // Text field for squad name
     JTextField nameField = new JTextField(15);
