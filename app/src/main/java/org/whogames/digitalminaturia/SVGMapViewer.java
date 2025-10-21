@@ -28,7 +28,12 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -53,6 +58,7 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
 import javax.swing.ToolTipManager;
 import javax.swing.UIManager;
 import javax.swing.plaf.basic.BasicScrollBarUI;
@@ -135,9 +141,45 @@ public class SVGMapViewer {
             showStyledDialog("Failed to load game data files: " + e.getMessage());
         }
 
-        countryList = ProvinceParser.parseCountries(new FileReader(new File(dataDir, "Minaturia Countries.csv")));
-        provinceList = ProvinceParser.parseProvinces(new FileReader(new File(dataDir, "Minaturia Provinces.csv")));
-        technologyList = ProvinceParser.parseItems(new FileReader(new File(dataDir, "Minaturia Technology.csv")));
+        ExecutorService executor = Executors.newFixedThreadPool(3);
+
+        // Launch all 3 parsing tasks in parallel
+        CompletableFuture<List<Country>> countriesFuture = CompletableFuture.supplyAsync(() -> {
+            try {
+                return ProvinceParser.parseCountries(new FileReader(new File(dataDir, "Minaturia Countries.csv")));
+            } catch (IOException e) {
+                e.printStackTrace();
+                return List.of(); // fallback
+            }
+        }, executor);
+
+        CompletableFuture<List<Province>> provincesFuture = CompletableFuture.supplyAsync(() -> {
+            try {
+                return ProvinceParser.parseProvinces(new FileReader(new File(dataDir, "Minaturia Provinces.csv")));
+            } catch (IOException e) {
+                e.printStackTrace();
+                return List.of();
+            }
+        }, executor);
+
+        CompletableFuture<List<Entity>> techFuture = CompletableFuture.supplyAsync(() -> {
+            try {
+                return ProvinceParser.parseItems(new FileReader(new File(dataDir, "Minaturia Technology.csv")));
+            } catch (IOException e) {
+                e.printStackTrace();
+                return List.of();
+            }
+        }, executor);
+
+        // Wait for all to finish
+        CompletableFuture.allOf(countriesFuture, provincesFuture, techFuture).join();
+
+        // Collect results
+        countryList = (ArrayList<Country>) countriesFuture.join();
+        provinceList = (ArrayList<Province>) provincesFuture.join();
+        technologyList = (ArrayList<Entity>) techFuture.join();
+
+        executor.shutdown();
         combatSim = new combatEngine();
 
         for (Entity tech : technologyList) {
@@ -372,114 +414,8 @@ public class SVGMapViewer {
         return infoPanel;
     }
 
-    private void setZoom(JScrollPane scrollPane) throws IOException {
-        for (String svgFi : SvgFiles){
-
-            File s = new File(dataDir, svgFi+".svg");
-            String parser = XMLResourceDescriptor.getXMLParserClassName();
-            SAXSVGDocumentFactory factory = new SAXSVGDocumentFactory(parser);
-            Document parsedDoc = factory.createDocument(s.toURI().toString());
-            JSVGCanvas svgCan = new JSVGCanvas();
-
-            svgCan.setDocumentState(JSVGCanvas.ALWAYS_DYNAMIC);
-            svgCan.setBackground(Color.BLACK);
-            svgCan.setBounds(0, 0, 2000, 1250);
-            svgCan.setDocument(parsedDoc);
-
-            AffineTransform at = AffineTransform.getScaleInstance(zoomFactor, zoomFactor);
-            svgCan.setRenderingTransform(at, true);
-            svgCan.setDoubleBuffered(true);
-
-            canvasMap.put(svgFi, svgCan);
-
-            JLayeredPane jlp = new JLayeredPane();
-            jlp.setBackground(Color.BLACK);
-            jlp.setOpaque(true);
-            jlp.setPreferredSize(new Dimension(2000, 1250));
-            jlp.setBounds(0, 0, 2000, 1250);
-            jlp.add(svgCan, JLayeredPane.DEFAULT_LAYER);
-            layeredPaneMap.put(svgFi, jlp);
-
-            cards.add(jlp, svgFi);
-        }
-
-        cards.addComponentListener(new ComponentAdapter() {
-            @Override
-            public void componentResized(ComponentEvent e) {
-
-                Dimension size = scrollPane.getViewport().getExtentSize();
-
-                // Position overlay controls relative to panel size
-                int x = (int) (size.width * 0.05);
-                int y = (int) (size.height * 0.08);
-                int width = 180;
-                int height = 30;
-                int sliderHeight = 50;
-
-                // Increased spacing for better visual separation
-                int spacing = 40;
-                int xSpacing = width + 30;
-
-                resourceSelect.setBounds(x, y, width, height);
-                techSelect.setBounds(x, y, width, height);
-                fuelSlider.setBounds(x + xSpacing, y, width + 70, sliderHeight);
-                foodInput.setBounds(x, y + spacing, width, height);
-                createSquad.setBounds(x, y, width, height);
-                System.out.println("layeredPane preferred size: " + cards.getPreferredSize());
-                System.out.println("scroll view size: " + scrollPane.getViewport().getViewSize());
-
-                // When zoom changes or size changes:
-            }
-        });
-
-        for (Map.Entry<String, JSVGCanvas> entry : canvasMap.entrySet()) {
-            JSVGCanvas canvas = entry.getValue();
-
-            canvas.addMouseWheelListener((MouseWheelEvent e) -> {
-                int notches = e.getWheelRotation();
-                if (notches < 0) {
-                    zoomFactor = Math.min(zoomFactor + zoomStep, zoomMax);
-                } else {
-                    zoomFactor = Math.max(zoomFactor - zoomStep, zoomMin);
-                }
-
-                Point mousePoint = e.getPoint();
-                AffineTransform currentTransform = canvas.getRenderingTransform();
-
-                try {
-                    Point2D mouseInUserSpace = currentTransform.inverseTransform(mousePoint, null);
-                    AffineTransform newTransform = new AffineTransform();
-                    newTransform.translate(mousePoint.getX(), mousePoint.getY());
-                    newTransform.scale(zoomFactor, zoomFactor);
-                    newTransform.translate(-mouseInUserSpace.getX(), -mouseInUserSpace.getY());
-
-                    canvas.setRenderingTransform(newTransform, true);
-
-                } catch (NoninvertibleTransformException ex) {
-                    ex.printStackTrace();
-                }
-            });
-        } 
-    }
-
-    public void createAndShowGUI() throws Exception {
-
-        loadResources();
-        setToolTipText();
-        initializeFrame();
-
-        cards = new JPanel(new CardLayout());
-        
+    private void styleCards() throws IOException {
         cards.setPreferredSize(new Dimension(2000, 1250));
-
-        topPanel = createTopPanel();
-        infoPanel = createInfoPanel();
-        scrollPane = createStyledScrollPane(cards); 
-        
-        setZoom(scrollPane);
-
-        frame.add(topPanel, BorderLayout.NORTH);
-        frame.add(infoPanel, BorderLayout.WEST);
 
         foodInput = new JButton("Order");
         styleButton(foodInput);
@@ -621,12 +557,175 @@ public class SVGMapViewer {
                 });
             }
         });
+    }
+    
+    private void setZoom(JScrollPane scrollPane) throws IOException {
 
-        frame.add(scrollPane, BorderLayout.CENTER);
+        ExecutorService svgExecutor = Executors.newFixedThreadPool(
+        Math.min(SvgFiles.length, Runtime.getRuntime().availableProcessors())
+);
 
-        frame.pack();
-        frame.setLocationRelativeTo(null);
-        frame.setVisible(true);
+List<Future<?>> futures = new ArrayList<>();
+
+for (String svgFi : SvgFiles) {
+    futures.add(svgExecutor.submit(() -> {
+        try {
+            File s = new File(dataDir, svgFi + ".svg");
+            String parser = XMLResourceDescriptor.getXMLParserClassName();
+            SAXSVGDocumentFactory factory = new SAXSVGDocumentFactory(parser);
+
+            // Parse off EDT
+            Document parsedDoc = factory.createDocument(s.toURI().toString());
+
+            // Create the canvas and layer structure safely on EDT
+            SwingUtilities.invokeLater(() -> {
+                JSVGCanvas svgCan = new JSVGCanvas();
+                svgCan.setDocumentState(JSVGCanvas.ALWAYS_DYNAMIC);
+                svgCan.setBackground(Color.BLACK);
+                svgCan.setBounds(0, 0, 2000, 1250);
+
+                svgCan.addGVTTreeRendererListener(new GVTTreeRendererAdapter() {
+                    @Override
+                    public void gvtRenderingCompleted(GVTTreeRendererEvent e) {
+                        SwingUtilities.invokeLater(() -> {
+                            // Initial zoom only after rendering
+                            AffineTransform at = AffineTransform.getScaleInstance(zoomFactor, zoomFactor);
+                            svgCan.setRenderingTransform(at, true);
+
+                            // Mouse wheel zoom
+                            svgCan.addMouseWheelListener((MouseWheelEvent ev) -> {
+                                int notches = ev.getWheelRotation();
+                                if (notches < 0) {
+                                    zoomFactor = Math.min(zoomFactor + zoomStep, zoomMax);
+                                } else {
+                                    zoomFactor = Math.max(zoomFactor - zoomStep, zoomMin);
+                                }
+
+                                Point mousePoint = ev.getPoint();
+                                AffineTransform currentTransform = svgCan.getRenderingTransform();
+                                try {
+                                    Point2D mouseInUserSpace = currentTransform.inverseTransform(mousePoint, null);
+                                    AffineTransform newTransform = new AffineTransform();
+                                    newTransform.translate(mousePoint.getX(), mousePoint.getY());
+                                    newTransform.scale(zoomFactor, zoomFactor);
+                                    newTransform.translate(-mouseInUserSpace.getX(), -mouseInUserSpace.getY());
+                                    svgCan.setRenderingTransform(newTransform, true);
+                                } catch (NoninvertibleTransformException ex) {
+                                    ex.printStackTrace();
+                                }
+                            });
+                        });
+                    }
+                });
+
+                // Set document on EDT
+                svgCan.setDocument(parsedDoc);
+                svgCan.setDoubleBuffered(true);
+
+                // Add to maps and panels
+                canvasMap.put(svgFi, svgCan);
+
+                JLayeredPane jlp = new JLayeredPane();
+                jlp.setBackground(Color.BLACK);
+                jlp.setOpaque(true);
+                jlp.setPreferredSize(new Dimension(2000, 1250));
+                jlp.setBounds(0, 0, 2000, 1250);
+                jlp.add(svgCan, JLayeredPane.DEFAULT_LAYER);
+                layeredPaneMap.put(svgFi, jlp);
+
+                cards.add(jlp, svgFi);
+            });
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }));
+}
+
+// Wait for all parsing tasks to complete before continuing
+for (Future<?> f : futures) {
+    try {
+        f.get();
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+}
+
+svgExecutor.shutdown();
+
+        // Your overlay component positioning stays as-is
+        cards.addComponentListener(new ComponentAdapter() {
+                @Override
+                public void componentResized(ComponentEvent e) {
+
+                    Dimension size = scrollPane.getViewport().getExtentSize();
+
+                    // Position overlay controls relative to panel size
+                    int x = (int) (size.width * 0.05);
+                    int y = (int) (size.height * 0.08);
+                    int width = 180;
+                    int height = 30;
+                    int sliderHeight = 50;
+
+                    // Increased spacing for better visual separation
+                    int spacing = 40;
+                    int xSpacing = width + 30;
+
+                    resourceSelect.setBounds(x, y, width, height);
+                    techSelect.setBounds(x, y, width, height);
+                    fuelSlider.setBounds(x + xSpacing, y, width + 70, sliderHeight);
+                    foodInput.setBounds(x, y + spacing, width, height);
+                    createSquad.setBounds(x, y, width, height);
+                    System.out.println("layeredPane preferred size: " + cards.getPreferredSize());
+                    System.out.println("scroll view size: " + scrollPane.getViewport().getViewSize());
+
+                    // When zoom changes or size changes:
+                }
+            });
+    }
+ 
+    public void createAndShowGUI() throws Exception {
+
+        initializeFrame();
+        setToolTipText();
+
+        topPanel = createTopPanel();
+        infoPanel = createInfoPanel();
+        cards = new JPanel(new CardLayout());
+        scrollPane = createStyledScrollPane(cards);
+        styleCards();
+
+        SwingWorker<Void, Void> loader = new SwingWorker<>() {
+        @Override
+        protected Void doInBackground() throws Exception {
+            // Runs off EDT
+            loadResources();   // CSVs, entity maps, inventories
+            setZoom(scrollPane); // SVG parsing, JSVGCanvas setup
+            return null;
+        }
+
+        @Override
+        protected void done() {
+            // Runs on EDT
+            try {
+                get(); // propagate exceptions if any
+
+                // Add heavy components to frame
+                frame.add(topPanel, BorderLayout.NORTH);
+                frame.add(infoPanel, BorderLayout.WEST);
+                frame.add(scrollPane, BorderLayout.CENTER);
+                frame.pack();
+                frame.setLocationRelativeTo(null);
+                frame.setVisible(true);
+
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(frame, "Failed to load resources: " + ex.getMessage());
+            }
+        }
+    };
+
+    loader.execute(); 
 
     }
 

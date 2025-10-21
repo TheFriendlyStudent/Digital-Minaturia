@@ -28,6 +28,7 @@ dependencies {
     implementation group: 'org.apache.xmlgraphics', name: 'batik-util', version: '1.19'
     implementation group: 'org.eclipse.birt.runtime.3_7_1', name: 'org.w3c.dom.svg', version: '1.1.0'
     implementation group: 'org.apache.xmlgraphics', name: 'batik-anim', version: '1.19'
+    implementation group: 'org.apache.xmlgraphics', name: 'batik-transcoder', version: '1.19'
     implementation 'org.apache.xmlgraphics:batik-all:1.19'
 }
 
