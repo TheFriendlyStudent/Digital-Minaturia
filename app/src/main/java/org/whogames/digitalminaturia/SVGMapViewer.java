@@ -580,23 +580,16 @@ public class SVGMapViewer {
                                     currentProvince = null;
                                     currentProvinceIndex = -1;
 
-                                    clearInfoFields(nameField, languageField, populationField, terrainField,
-                                            tierField, cityTypeField, budget1Field, budget2Field,
-                                            countryNameLabel, capitalLabel, populationLabel);
+                                    clearInfoFields();
                                     return;
                                 }
 
                                 currentProvinceIndex = pId - 1;
                                 currentProvince = provinceList.get(currentProvinceIndex);
 
-                                nameField.setText(currentProvince.getName());
-                                languageField.setText(currentProvince.getLanguage());
-                                populationField.setText(String.valueOf(currentProvince.getPopulation()));
-                                terrainField.setText(currentProvince.getTerrain());
-                                tierField.setText(String.valueOf(currentProvince.getTier()));
-                                cityTypeField.setText(currentProvince.getCityType());
-                                budget1Field.setText(String.valueOf(currentProvince.getBudget1()));
-                                budget2Field.setText(String.valueOf(currentProvince.getBudget2()));
+                                updateInfoPanel(currentProvince.getName(), currentProvince.getLanguage(), String.valueOf(currentProvince.getPopulation()),
+                                currentProvince.getTerrain(), String.valueOf(currentProvince.getTier()), currentProvince.getCityType(),
+                                String.valueOf(currentProvince.getBudget1()), String.valueOf(currentProvince.getBudget2()));
 
                                 Country country = getCountryByName(currentProvince.getCountry());
 
@@ -672,6 +665,27 @@ public class SVGMapViewer {
         populationLabel.setText("Population: " + population);
 
     }
+
+    private void updateInfoPanel(String nameField, String languageField, String populationField,
+            String terrainField, String tierField, String cityTypeField,
+            String budget1Field, String budget2Field) {
+                JTextField nameField1 = (JTextField) infoPanel.getComponent(0);
+                nameField1.setText(nameField);
+                JTextField languageField1 = (JTextField) infoPanel.getComponent(2);
+                languageField1.setText(languageField);
+                JTextField populationField1 = (JTextField) infoPanel.getComponent(4);
+                populationField1.setText(populationField);
+                JTextField terrainField1 = (JTextField) infoPanel.getComponent(6);
+                terrainField1.setText(terrainField);
+                JTextField tierField1 = (JTextField) infoPanel.getComponent(8);
+                tierField1.setText(tierField);
+                JTextField cityTypeField1 = (JTextField) infoPanel.getComponent(10);
+                cityTypeField1.setText(cityTypeField);
+                JTextField budget1Field1 = (JTextField) infoPanel.getComponent(12);
+                budget1Field1.setText(budget1Field);
+                JTextField budget2Field1 = (JTextField) infoPanel.getComponent(14);
+                budget2Field1.setText(budget2Field);
+            }
 
     private void updateInventoryForCountry(String country) {
         if (country == null) {
@@ -918,8 +932,8 @@ public class SVGMapViewer {
 }
 
 
-// Helper method to set background/foreground recursively
-private void setColorsRecursive(Container container, Color bg, Color fg) {
+    // Helper method to set background/foreground recursively
+    private void setColorsRecursive(Container container, Color bg, Color fg) {
     for (Component comp : container.getComponents()) {
         comp.setBackground(bg);
         comp.setForeground(fg);
@@ -928,7 +942,6 @@ private void setColorsRecursive(Container container, Color bg, Color fg) {
         }
     }
 }
-
 
     private void addField(JPanel panel, String labelText, JTextField field, Font font) {
         JLabel label = new JLabel(labelText);
@@ -940,21 +953,8 @@ private void setColorsRecursive(Container container, Color bg, Color fg) {
         panel.add(Box.createRigidArea(new Dimension(0, 5)));
     }
 
-    private void clearInfoFields(JTextField nameField, JTextField languageField, JTextField populationField,
-            JTextField terrainField, JTextField tierField, JTextField cityTypeField,
-            JTextField budget1Field, JTextField budget2Field,
-            JLabel countryNameLabel, JLabel capitalLabel, JLabel populationLabel) {
-        nameField.setText("");
-        languageField.setText("");
-        populationField.setText("");
-        terrainField.setText("");
-        tierField.setText("");
-        cityTypeField.setText("");
-        budget1Field.setText("");
-        budget2Field.setText("");
-        countryNameLabel.setText("COUNTRY: NONE SELECTED");
-        capitalLabel.setText("Capital: ");
-        populationLabel.setText("Population: ");
+    private void clearInfoFields() {
+        updateInfoPanel("", "", "", "", "", "", "", "");
     }
 
     public static Country getCountryByName(String name) {
