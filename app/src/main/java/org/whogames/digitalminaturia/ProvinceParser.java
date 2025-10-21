@@ -110,6 +110,8 @@ public class ProvinceParser {
 
                 combatEngine.Edge edge = new combatEngine.Edge(fromID, toID, weight);
                 edges.add(edge);
+                SVGMapViewer.getProvinceById(fromID).getNeighboringProvinces().add(SVGMapViewer.getProvinceById(toID));
+                SVGMapViewer.getProvinceById(toID).getNeighboringProvinces().add(SVGMapViewer.getProvinceById(fromID));
 
             } catch (NumberFormatException e) {
                 System.err.println("Number format error in line: " + line);

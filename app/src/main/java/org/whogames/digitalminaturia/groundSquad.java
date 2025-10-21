@@ -11,6 +11,17 @@ public class groundSquad extends Squad {
 
     private int APDamage, ATDamage, Penetration;
 
+    public groundSquad(int id, String name, String country) {
+        super(id, name, country);
+        soldiers = new HashMap<>();
+        for (int i = 0; i < 10; i++) {
+            addSoldier("Rifleman", i+1);
+        }
+        firearms = new HashMap<>();
+        vehicles = new HashMap<>();
+        calculateHealth();
+    }
+
     public groundSquad(int id, String name, int health, String type, String country, String ammo, int personnel) {
         super(id, name, health, type, country, ammo, personnel);
         soldiers = new HashMap<>();

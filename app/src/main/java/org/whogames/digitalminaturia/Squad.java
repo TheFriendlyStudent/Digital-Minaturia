@@ -9,6 +9,24 @@ public abstract class Squad {
     protected String country;
     private String ammo;
 
+    public Squad() {
+        this.id = 0;
+        this.name = "Unnamed Squad";
+        this.health = 0;
+        this.type = "Infantry";
+        this.country = "Unknown";
+        this.ammo = "Standard";
+    }
+
+    public Squad(int id, String name, String country) {
+        this.id = id;
+        this.name = name;
+        this.health = 0;
+        this.type = "Infantry";
+        this.country = country;
+        this.ammo = "Standard";
+    }
+
     public Squad(int id, String name, int health, String type, String country, String ammo, int personnel) {
         this.id = id;
         this.name = name;

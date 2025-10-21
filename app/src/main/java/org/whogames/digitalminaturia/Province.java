@@ -14,6 +14,7 @@ public class Province {
     private String cityType;
     private long budget1;
     private long budget2;
+    private ArrayList<Province> neighboringProvinces = new ArrayList<Province>();
     private ArrayList<Battalion> battalions = new ArrayList<Battalion>();
 
     public Province(int id, String name, String country, String language, int population,
@@ -106,6 +107,10 @@ public class Province {
 
     public void setBudget2(long budget2) {
         this.budget2 = budget2;
+    }
+
+    public ArrayList<Province> getNeighboringProvinces() {
+        return neighboringProvinces;
     }
 
     // toString for debugging (optional)

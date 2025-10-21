@@ -628,7 +628,6 @@ for (Map.Entry<String, JSVGCanvas> entry : canvasMap.entrySet()) {
         }
     });
 }
-
         frame.pack();
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
@@ -669,29 +668,6 @@ private void attachTooltipListeners(Element el, String tooltipText) {
 
         // Example logic to update inventory based on production controls
         String selectedResource = (String) resourceSelect.getSelectedItem();
-        int fuelAmount = fuelSlider.getValue();
-
-        Entity resource = entityMap.get(selectedResource);
-        Country A = getCountryByName(country);
-        if (resource != null && A != null) {
-            if (A.getInventory().containsKey(resource)) {
-                int currentAmount = A.getInventory().get(resource);
-                A.getInventory().put(resource, currentAmount + fuelAmount);
-            } else {
-                A.getInventory().put(resource, fuelAmount);
-            }
-            showStyledDialog("Added");
-        }
-    }
-
-    private void updateTechnology(String country) {
-        if (country == null) {
-            showStyledDialog("No country selected.");
-            return;
-        }
-
-        // Example logic to update inventory based on production controls
-        String selectedResource = (String) techSelect.getSelectedItem();
         int fuelAmount = fuelSlider.getValue();
 
         Entity resource = entityMap.get(selectedResource);
@@ -837,6 +813,15 @@ private void showStyledDialog(String message) {
     
     dialog.setVisible(true);
 }
+
+    public static Province getProvinceById(int fromID) {
+        for (Province province : provinceList) {
+            if (province.getId() == fromID) {
+                return province;
+            }
+        }
+        return null;
+    }
 
 private void createSquadDialog() {
     
