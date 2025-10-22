@@ -2,6 +2,8 @@ package org.whogames.digitalminaturia;
 
 import java.util.ArrayList;
 
+import org.whogames.digitalminaturia.Combat.Battalion;
+
 public class Province {
 
     private int id;

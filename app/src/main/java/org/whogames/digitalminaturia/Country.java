@@ -3,6 +3,10 @@ package org.whogames.digitalminaturia;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.whogames.digitalminaturia.Combat.Battalion;
+import org.whogames.digitalminaturia.Combat.Entity;
+import org.whogames.digitalminaturia.Combat.Squad;
+
 public class Country {
 
     private String name;

@@ -1,6 +1,9 @@
-package org.whogames.digitalminaturia;
+package org.whogames.digitalminaturia.Combat;
 
 import java.util.HashMap;
+
+import org.whogames.digitalminaturia.Country;
+import org.whogames.digitalminaturia.Province;
 
 public class Battalion {
     

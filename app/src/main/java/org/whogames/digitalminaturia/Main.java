@@ -4,12 +4,12 @@ import javax.swing.SwingUtilities;
 
 public class Main {
     public static void main(String[] args) {
-        SVGMapViewer exs = new SVGMapViewer();
+
         SwingUtilities.invokeLater(() -> {
             try {
-                exs.createAndShowGUI();
-
+                SVGMapViewer exs = new SVGMapViewer();
             } catch (Exception e) {
+                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
         });

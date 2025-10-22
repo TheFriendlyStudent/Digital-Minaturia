@@ -1,4 +1,4 @@
-package org.whogames.digitalminaturia;
+package org.whogames.digitalminaturia.Combat;
 
 import java.util.HashMap;
 import java.util.Map;

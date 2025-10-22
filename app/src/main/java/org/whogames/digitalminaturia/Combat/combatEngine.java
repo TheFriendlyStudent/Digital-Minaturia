@@ -1,4 +1,4 @@
-package org.whogames.digitalminaturia;
+package org.whogames.digitalminaturia.Combat;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -6,22 +6,14 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import org.whogames.digitalminaturia.Province;
+import org.whogames.digitalminaturia.ProvinceParser;
+import org.whogames.digitalminaturia.SVGMapViewer;
+
 public class combatEngine {
 
     private ArrayList<Edge> edges;
     private ArrayList<Province> provinces;
-    
-    static class Edge {
-        int source;
-        int destination;
-        int weight;
-
-        public Edge(int source, int destination, int weight) {
-            this.source = source;
-            this.destination = destination;
-            this.weight = weight;
-        }
-    }
 
     public combatEngine() {
         try {

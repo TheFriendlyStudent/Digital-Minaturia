@@ -1,4 +1,4 @@
-package org.whogames.digitalminaturia;
+package org.whogames.digitalminaturia.Combat;
 
 public class Platoon {
 

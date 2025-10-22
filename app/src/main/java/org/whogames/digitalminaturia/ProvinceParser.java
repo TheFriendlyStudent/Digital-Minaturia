@@ -17,6 +17,12 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import org.whogames.digitalminaturia.Combat.Ammunition;
+import org.whogames.digitalminaturia.Combat.Edge;
+import org.whogames.digitalminaturia.Combat.Entity;
+import org.whogames.digitalminaturia.Combat.Firearm;
+import org.whogames.digitalminaturia.Combat.Vehicle;
+
 public class ProvinceParser {
 
     private static final File dataDir = new File(System.getProperty("user.home"), "MinaturiaData");
@@ -86,8 +92,8 @@ public class ProvinceParser {
         return provinces;
     }
 
-    public static ArrayList<combatEngine.Edge> parseEdges(Reader reader) throws IOException {
-        ArrayList<combatEngine.Edge> edges = new ArrayList<>();
+    public static ArrayList<Edge> parseEdges(Reader reader) throws IOException {
+        ArrayList<Edge> edges = new ArrayList<>();
         BufferedReader br = new BufferedReader(reader);
         String line;
 
@@ -108,7 +114,7 @@ public class ProvinceParser {
                 int toID = Integer.parseInt(tokens[1].trim());
                 int weight = Integer.parseInt(tokens[2].trim());
 
-                combatEngine.Edge edge = new combatEngine.Edge(fromID, toID, weight);
+                Edge edge = new Edge(fromID, toID, weight);
                 edges.add(edge);
                 SVGMapViewer.getProvinceById(fromID).getNeighboringProvinces().add(SVGMapViewer.getProvinceById(toID));
                 SVGMapViewer.getProvinceById(toID).getNeighboringProvinces().add(SVGMapViewer.getProvinceById(fromID));

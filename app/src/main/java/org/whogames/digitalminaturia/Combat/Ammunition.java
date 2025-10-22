@@ -1,4 +1,4 @@
-package org.whogames.digitalminaturia;
+package org.whogames.digitalminaturia.Combat;
 
 public class Ammunition implements Entity {
 
@@ -20,11 +20,6 @@ public class Ammunition implements Entity {
     @Override
     public String getName() {
         return name;
-    }
-
-    @Override
-    public int getUnits() {
-        return unit;
     }
 
     public double getCost() {
@@ -58,6 +53,36 @@ public class Ammunition implements Entity {
 
     public static String[] getTypes() {
         return types;
+    }
+
+    @Override
+    public String getTypeClass() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getTypeClass'");
+    }
+
+    @Override
+    public String getSubclass() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getSubclass'");
+    }
+
+    @Override
+    public int getProductionCost() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getProductionCost'");
+    }
+
+    @Override
+    public int getLaborCost() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getLaborCost'");
+    }
+
+    @Override
+    public int getWeight() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getWeight'");
     }
 
 }
