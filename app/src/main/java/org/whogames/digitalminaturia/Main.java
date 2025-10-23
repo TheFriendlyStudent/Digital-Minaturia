@@ -10,9 +10,7 @@ public class Main {
                 SVGMapViewer exs = new SVGMapViewer();
                 System.err.println(getGreeting());
             } catch (Exception e) {
-                // TODO Auto-generated catch block
                 System.out.println("[ERROR] Exception in main:");
-                e.printStackTrace();
             }
         });
     }

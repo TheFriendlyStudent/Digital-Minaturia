@@ -7,6 +7,7 @@ public class Vehicle implements Entity {
     private String country;
     private int units;
     private double cost;
+    private HashMap<String, Weapon> weapons;
     public static String types[] = {"MBT", "Tankette", "Heavy Tank", "Aircraft Carrier", 
     "Disposable Anti Tank Rocket", "Jet Bomber", "Midget Submarine", "Missile Submarine", 
     "Jet Attacker", "VTOL Attacker", "Jet Interceptor", "Light Carrier", "APC", "IFV", 

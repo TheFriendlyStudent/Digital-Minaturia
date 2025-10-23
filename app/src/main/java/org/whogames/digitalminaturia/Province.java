@@ -114,6 +114,18 @@ public class Province {
         return neighboringProvinces;
     }
 
+    public ArrayList<Battalion> getBattalions() {
+        return battalions;
+    }
+
+    public void addNeighboringProvince(Province province) {
+        neighboringProvinces.add(province);
+    }
+
+    public void addBattalion(Battalion battalion) {
+        battalions.add(battalion);
+    }
+
     // toString for debugging (optional)
     @Override
     public String toString() {

@@ -195,8 +195,8 @@ public class SVGMapViewer {
 
         // Collect results
         countryList = new ArrayList<>(countriesFuture.join());
-        provinceMap = new HashMap<Integer, Province>(provincesFuture.join());
-        technologyList = new ArrayList<Entity>(techFuture.join());
+        provinceMap = new HashMap<>(provincesFuture.join());
+        technologyList = new ArrayList<>(techFuture.join());
 
         System.err.println("[DEBUG] Parsed " + provinceMap.size() + " provinces.");
         System.err.println("[DEBUG] Parsed " + countryList.size() + " countries.");
@@ -421,7 +421,7 @@ public class SVGMapViewer {
                     currentProvince.setBudget1(Long.parseLong(budget1Field.getText()));
                     currentProvince.setBudget2(Long.parseLong(budget2Field.getText()));
 
-                ProvinceParser.writeProvincesToCSV(new ArrayList<Province>(provinceMap.values().stream().toList()), new File(dataDir, "Minaturia Provinces.csv").getAbsolutePath());
+                ProvinceParser.writeProvincesToCSV(new ArrayList<>(provinceMap.values().stream().toList()), new File(dataDir, "Minaturia Provinces.csv").getAbsolutePath());
 
                     JOptionPane.showMessageDialog(frame, "Changes saved.");
                 } catch (Exception ex) {
@@ -1013,7 +1013,7 @@ public static Province getProvinceById(int id) {
     sizeSpinner.setBackground(Color.BLACK);
     sizeSpinner.setForeground(Color.WHITE);
 
-    JComboBox typeSelect = new JComboBox<>(new String[]{"Ground", "Air", "Water"});
+    JComboBox<String> typeSelect = new JComboBox<>(new String[]{"Ground", "Air", "Water"});
     typeSelect.setBackground(Color.BLACK);
     typeSelect.setForeground(Color.WHITE);
     typeSelect.setFont(new Font("Monospaced", Font.PLAIN, 14));

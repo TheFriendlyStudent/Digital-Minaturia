@@ -1,6 +1,6 @@
 package org.whogames.digitalminaturia.Combat.Entities;
 
-public class Bomb implements Entity {
+public class Missile implements Entity {
 
     private String name;
     private String type;

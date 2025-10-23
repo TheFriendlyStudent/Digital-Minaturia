@@ -3,7 +3,6 @@ package org.whogames.digitalminaturia;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import org.whogames.digitalminaturia.Combat.Battalion;
 import org.whogames.digitalminaturia.Combat.Squad;
 import org.whogames.digitalminaturia.Combat.Entities.Entity;
 
