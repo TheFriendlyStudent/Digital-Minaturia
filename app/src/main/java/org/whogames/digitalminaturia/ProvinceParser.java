@@ -92,8 +92,8 @@ public class ProvinceParser {
         return provinces;
     }
 
-    public static ArrayList<Edge> parseEdges(Reader reader) throws IOException {
-        ArrayList<Edge> edges = new ArrayList<>();
+    public static ArrayList<List<Edge>> parseEdges(Reader reader) throws IOException {
+        ArrayList<List<Edge>> adjList = new ArrayList<>();
         BufferedReader br = new BufferedReader(reader);
         String line;
 
@@ -114,8 +114,13 @@ public class ProvinceParser {
                 int toID = Integer.parseInt(tokens[1].trim());
                 int weight = Integer.parseInt(tokens[2].trim());
 
-                Edge edge = new Edge(fromID, toID, weight);
-                edges.add(edge);
+                Edge edge1 = new Edge(fromID, toID, weight);
+                adjList.get(fromID).add(edge1);
+
+                // For an undirected graph, add the edge in both directions
+                Edge edge2 = new Edge(fromID, toID, weight);
+                adjList.get(toID).add(edge2);
+
                 SVGMapViewer.getProvinceById(fromID).getNeighboringProvinces().add(SVGMapViewer.getProvinceById(toID));
                 SVGMapViewer.getProvinceById(toID).getNeighboringProvinces().add(SVGMapViewer.getProvinceById(fromID));
 
@@ -124,7 +129,7 @@ public class ProvinceParser {
             }
         }
 
-        return edges;
+        return adjList;
     }
 
     public static ArrayList<Country> parseCountries(Reader reader) throws IOException {

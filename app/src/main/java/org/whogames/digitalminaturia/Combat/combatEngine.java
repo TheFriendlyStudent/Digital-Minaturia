@@ -1,5 +1,6 @@
 package org.whogames.digitalminaturia.Combat;
 
+import java.util.List;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -12,12 +13,12 @@ import org.whogames.digitalminaturia.SVGMapViewer;
 
 public class combatEngine {
 
-    private ArrayList<Edge> edges;
+    private ArrayList<List<Edge>> adjList;
     private ArrayList<Province> provinces;
 
     public combatEngine() {
         try {
-            this.edges = ProvinceParser.parseEdges(new FileReader(new File(SVGMapViewer.dataDir, "Minaturia Edges.csv")));
+            this.adjList = ProvinceParser.parseEdges(new FileReader(new File(SVGMapViewer.dataDir, "Minaturia Edges.csv")));
         } catch (FileNotFoundException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -26,9 +27,17 @@ public class combatEngine {
             e.printStackTrace();
         }
         this.provinces = SVGMapViewer.provinceList;
+
+        for (Province p : provinces) {
+            System.out.print(p.getName() + " borders: ");
+                for (Province n : p.getNeighboringProvinces()) {
+                    System.out.print(n.getName() + " ");
+                }   
+                System.out.println();
+        }
     }
 
-    public void simulateBattle(Battalion attacker, Battalion defender) {
+    public void simulateBattle(Company attacker, Company defender) {
         // Implement combat simulation logic here
     }
 
@@ -50,5 +59,20 @@ public class combatEngine {
         }
         return false;
     }
+
+    public static void moveBattalion(Battalion battalion, Province newLocation) {
+        if (battalion.getLocation() == newLocation) {
+            return; // No movement needed
+        }
+        if (battalion.getLocation().getNeighboringProvinces().contains(newLocation)){
+            battalion.moveToProvince(newLocation);
+        }
+        else{
+
+        }
+        battalion.moveToProvince(newLocation);
+    }
+
+    
 }
 

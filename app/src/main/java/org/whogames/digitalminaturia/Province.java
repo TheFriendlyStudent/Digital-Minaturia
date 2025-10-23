@@ -16,8 +16,8 @@ public class Province {
     private String cityType;
     private long budget1;
     private long budget2;
-    private ArrayList<Province> neighboringProvinces = new ArrayList<Province>();
-    private ArrayList<Battalion> battalions = new ArrayList<Battalion>();
+    private ArrayList<Province> neighboringProvinces = new ArrayList<>();
+    private ArrayList<Battalion> battalions = new ArrayList<>();
 
     public Province(int id, String name, String country, String language, int population,
             String terrain, int tier, String cityType, long budget1, long budget2) {
@@ -33,7 +33,6 @@ public class Province {
         this.budget2 = budget2;
     }
 
-    // Getters (optional)
     public int getId() {
         return id;
     }
