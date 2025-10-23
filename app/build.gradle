@@ -30,6 +30,8 @@ dependencies {
     implementation group: 'org.apache.xmlgraphics', name: 'batik-anim', version: '1.19'
     implementation group: 'org.apache.xmlgraphics', name: 'batik-transcoder', version: '1.19'
     implementation 'org.apache.xmlgraphics:batik-all:1.19'
+
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.17.1'
 }
 
 // Apply a specific Java toolchain to ease working on different environments.
