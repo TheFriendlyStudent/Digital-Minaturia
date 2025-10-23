@@ -176,17 +176,17 @@
 176,Zielney,Eirikr,Stonish,27186,Forest,5,City,2500000,1000000
 177,Seredsk,Eirikr,Stonish,704,Forest,2,Village,2500000,1000000
 178,Kasongrad,Eirikr,Stonish,479,Forest,1,Frontier,2500000,1000000
-179,Epsilon,Eirikr,Stonish,612,Forest,2,Village,2500000,1000000
+179,Epsilongrad,Eirikr,Stonish,612,Forest,2,Village,2500000,1000000
 180,Betagrad,Eirikr,Stonish,1497,Forest,3,Town,2500000,1000000
-181,,Eirikr,Stonish,579,Forest,2,Village,2500000,1000000
+181,Surkasongrad,Eirikr,Stonish,579,Forest,2,Village,2500000,1000000
 182,Neystadt,Eirikr,Stonish,4401,Forest,3,Town,2500000,1000000
 183,Gorvik,Eirikr,Stonish,37275,Mountains,5,City,0,1000000
 184,Gammagrad,Eirikr,Stonish,5349,Forest,4,Large Town,2500000,1000000
-185,,Eirikr,Stonish,104,Mountains,1,Frontier,0,1000000
+185,Novgrad,Eirikr,Stonish,104,Mountains,1,Frontier,0,1000000
 186,Epsilon,Eirikr,Stonish,2924,Forest,3,Town,2500000,1000000
-187,,Eirikr,Stonish,204,Forest,1,Frontier,2500000,1000000
+187,Novpetrograd,Eirikr,Stonish,204,Forest,1,Frontier,2500000,1000000
 188,Zetagrad,Eirikr,Stonish,10094,Forest,5,City,2500000,1000000
-189,,Eirikr,Stonish,473,Forest,1,Frontier,2500000,1000000
+189,Tartagrad,Eirikr,Stonish,473,Forest,1,Frontier,2500000,1000000
 190,Etagrad,Eirikr,Stonish,3683,Forest,3,Town,2500000,1000000
 191,Phigorod,Eirikr,Stonish,559,Mountains,2,Village,0,1000000
 192,Thetagrad,Eirikr,Stonish,8102,Mountains,4,Large Town,0,1000000
@@ -194,34 +194,34 @@
 194,Iotagrad,Eirikr,Stonish,51870,Plains,6,Large City,7500000,1000000
 195,Kappagrad,Eirikr,Stonish,9972,Plains,4,Large Town,7500000,1000000
 196,Alphagrad,Eirikr,Stonish,36182,Plains,5,City,7500000,1000000
-197,,Eirikr,Stonish,309,Bog,1,Frontier,0,75000000
+197,Cartagrad,Eirikr,Stonish,309,Bog,1,Frontier,0,75000000
 198,Besplosia,Eirikr,Stonish,863,Bog,2,Village,0,75000000
-199,,Eirikr,Stonish,425,Forest,1,Frontier,2500000,1000000
+199,Vahallagrad,Eirikr,Stonish,425,Forest,1,Frontier,2500000,1000000
 200,Psigorod,Eirikr,Stonish,1035,Forest,2,Village,2500000,1000000
-201,,Eirikr,Stonish,229,Forest,1,Frontier,2500000,1000000
+201,Felipigrad,Eirikr,Stonish,229,Forest,1,Frontier,2500000,1000000
 202,Sigmagrad,Eirikr,Stonish,83227,Forest,6,Large City,2500000,1000000
 203,Lamdagrad,Eirikr,Stonish,2387,Forest,3,Town,2500000,1000000
 204,Valashka,Eirikr,Stonish,333,Mountains,1,Frontier,0,1000000
 205,Mugorod,Eirikr,Stonish,1389,Mountains,3,Town,0,1000000
-206,,Eirikr,Stonish,469,Plains,1,Frontier,7500000,1000000
+206,Santorigrad,Eirikr,Stonish,469,Plains,1,Frontier,7500000,1000000
 207,Nugorod,Eirikr,Stonish,990,Mountains,2,Village,0,1000000
 208,Hohol,Eirikr,Stonish,203,Plains,1,Frontier,7500000,1000000
-209,,Eirikr,Stonish,1034,Plains,2,Village,7500000,1000000
+209,Koringrad,Eirikr,Stonish,1034,Plains,2,Village,7500000,1000000
 210,Yesaul,Eirikr,Stonish,708,Plains,2,Village,7500000,1000000
 211,Spartagrad,Eirikr,Stonish,774,Plains,2,Village,7500000,1000000
 212,Attagard,Eirikr,Stonish,149,Bog,1,Frontier,0,75000000
-213,,Eirikr,Stonish,669,Forest,2,Village,2500000,1000000
+213,Bysantigrad,Eirikr,Stonish,669,Forest,2,Village,2500000,1000000
 214,Xigorod,Eirikr,Stonish,2266,Forest,3,Town,2500000,1000000
-215,,Eirikr,Stonish,367,Forest,1,Frontier,2500000,1000000
+215,Cretegrad,Eirikr,Stonish,367,Forest,1,Frontier,2500000,1000000
 216,Omicron,Eirikr,Stonish,2443,Forest,3,Town,2500000,1000000
 217,Omegagrad,Eirikr,Stonish,7255,Forest,4,Large Town,2500000,1000000
-218,,Eirikr,Stonish,860,Forest,2,Village,2500000,1000000
+218,Thessalonikigrad,Eirikr,Stonish,860,Forest,2,Village,2500000,1000000
 219,Atengrad,Eirikr,Stonish,1090,Forest,2,Village,2500000,1000000
-220,,Eirikr,Stonish,1085,Forest,2,Village,2500000,1000000
-221,,Eirikr,Stonish,444,Forest,1,Frontier,2500000,1000000
+220,Thebgrad,Eirikr,Stonish,1085,Forest,2,Village,2500000,1000000
+221,Surpont,Eirikr,Stonish,444,Forest,1,Frontier,2500000,1000000
 222,Pigorod,Eirikr,Stonish,1734,Mountains,3,Town,0,1000000
 223,Rhograd,Eirikr,Stonish,4138,Mountains,3,Town,0,1000000
-224,,Eirikr,Stonish,873,Plains,2,Village,7500000,1000000
+224,Suryesaul,Eirikr,Stonish,873,Plains,2,Village,7500000,1000000
 225,Taugorod,Eirikr,Stonish,4187,Bog,3,Town,0,75000000
 226,Omnissigrad (Омнысиграл),Workers' Republic of North Ostesia,English,8716,Forest,4,Large Town,2500000,2000000
 227,Stygigrad (Стайгиград),Workers' Republic of North Ostesia,English,1095,Forest,2,Village,2500000,2000000
