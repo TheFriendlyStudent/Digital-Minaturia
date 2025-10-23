@@ -78,11 +78,11 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.events.EventTarget;
 import org.w3c.dom.svg.SVGDocument;
-import org.whogames.digitalminaturia.Combat.Ammunition;
-import org.whogames.digitalminaturia.Combat.Entity;
-import org.whogames.digitalminaturia.Combat.Firearm;
-import org.whogames.digitalminaturia.Combat.Vehicle;
 import org.whogames.digitalminaturia.Combat.combatEngine;
+import org.whogames.digitalminaturia.Combat.Entities.Ammunition;
+import org.whogames.digitalminaturia.Combat.Entities.Entity;
+import org.whogames.digitalminaturia.Combat.Entities.Firearm;
+import org.whogames.digitalminaturia.Combat.Entities.Vehicle;
 
 public class SVGMapViewer {
 

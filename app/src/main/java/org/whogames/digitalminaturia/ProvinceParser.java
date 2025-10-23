@@ -17,11 +17,11 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import org.whogames.digitalminaturia.Combat.Ammunition;
 import org.whogames.digitalminaturia.Combat.Edge;
-import org.whogames.digitalminaturia.Combat.Entity;
-import org.whogames.digitalminaturia.Combat.Firearm;
-import org.whogames.digitalminaturia.Combat.Vehicle;
+import org.whogames.digitalminaturia.Combat.Entities.Ammunition;
+import org.whogames.digitalminaturia.Combat.Entities.Entity;
+import org.whogames.digitalminaturia.Combat.Entities.Firearm;
+import org.whogames.digitalminaturia.Combat.Entities.Vehicle;
 
 public class ProvinceParser {
 

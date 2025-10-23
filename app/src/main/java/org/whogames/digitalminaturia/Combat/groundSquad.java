@@ -3,10 +3,11 @@ package org.whogames.digitalminaturia.Combat;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.whogames.digitalminaturia.Combat.Entities.Vehicle;
+
 public class groundSquad extends Squad {
 
-    public HashMap<String, Integer> soldiers;
-    public HashMap<Firearm, Integer> firearms;
+    public HashMap<String, Soldier> soldiers;
     public HashMap<Vehicle, Integer> vehicles;
 
     private int APDamage, ATDamage, Penetration;
@@ -17,46 +18,19 @@ public class groundSquad extends Squad {
         for (int i = 0; i < 10; i++) {
             addSoldier("Rifleman", i+1);
         }
-        firearms = new HashMap<>();
         vehicles = new HashMap<>();
-        calculateHealth();
     }
 
     public groundSquad(int id, String name, int health, String type, String country, String ammo, int personnel) {
         super(id, name, health, type, country, ammo, personnel);
         soldiers = new HashMap<>();
-        firearms = new HashMap<>();
         vehicles = new HashMap<>();
-        calculateHealth();
     }
 
     public void addSoldier(String soldierName, int count) {
-        soldiers.put(soldierName, soldiers.getOrDefault(soldierName, 0) + count);
+        
     }
 
-    public void removeSoldier(String soldierName, int count) {
-        if (soldiers.containsKey(soldierName)) {
-            int currentCount = soldiers.get(soldierName);
-            if (currentCount <= count) {
-                soldiers.remove(soldierName);
-            } else {
-                soldiers.put(soldierName, currentCount - count);
-            }
-        }
-    }
-
-    public HashMap<String, Integer> getSoldiers() {
-        return soldiers;
-    }
-
-    public int calculateHealth(){
-        for (Map.Entry<String, Integer> e : soldiers.entrySet()){
-            if (e.getKey().equals("Rifleman")){
-                this.health+=e.getValue()*3;
-            }
-        }
-        return 0;
-    }
 
     @Override
     public String toString() {

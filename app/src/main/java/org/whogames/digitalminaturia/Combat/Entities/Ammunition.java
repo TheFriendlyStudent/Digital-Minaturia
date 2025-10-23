@@ -1,27 +1,29 @@
-package org.whogames.digitalminaturia.Combat;
+package org.whogames.digitalminaturia.Combat.Entities;
 
-public class Firearm implements Entity {
+public class Ammunition implements Entity {
 
     private String name;
     private String type;
-    private int units;
     private String country;
+    private int unit;
     private double cost;
-    private int fireRate;
-    private int reloadTime;
-    public static String types[] = {"Assault Rifle", "Rifle", "Howitzer", "Battle Rifle", "RPG", "Handgun", "HMG", "SMG", "GPMG", "LMG", "Cannon", "Cannon Round", "Autocannon", "Grenade Launcher", "Rifle Grenade", "Recoilless Gun"};
+    public static String types[] = {"Intermediate Round", "Pistol Round", "SAM", "Rifle Round", "ATGM", "Artillery Shell", "Missile", "Bomb", "Grenade", "RCL Round", "Cannon Round", "Depth Charge", "Torpedo", "AAM", "TBM"};
 
-    public Firearm(String name, String type, String country, int units, double cost) {
+    public Ammunition(String name, String type, String country, int unit, double cost) {
         this.name = name;
         this.type = type;
         this.country = country;
-        this.units = units;
+        this.unit = unit;
         this.cost = cost;
     }
 
     @Override
-    public Object[] getAtts() {
-        return new Object[]{name, type, units, cost};
+    public String getName() {
+        return name;
+    }
+
+    public double getCost() {
+        return cost;
     }
 
     @Override
@@ -30,22 +32,21 @@ public class Firearm implements Entity {
     }
 
     @Override
-    public void setAtts(Object[] atts) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setAtts'");
+    public Object[] getAtts() {
+        throw new UnsupportedOperationException("Unimplemented method 'getAtts'");
     }
 
     @Override
-    public String getName() {
-        return name;
+    public void setAtts(Object[] atts) {
+        throw new UnsupportedOperationException("Unimplemented method 'setAtts'");
     }
 
     public String toString() {
-        return "Firearm{"
+        return "Ammunition{"
                 + "name='" + name + '\''
                 + ", type='" + type + '\''
-                + ", units=" + units
                 + ", country='" + country + '\''
+                + ", unit=" + unit
                 + ", cost=" + cost
                 + '}';
     }

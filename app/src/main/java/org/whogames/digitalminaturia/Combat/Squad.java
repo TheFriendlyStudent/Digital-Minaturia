@@ -10,7 +10,6 @@ public abstract class Squad {
     private String type;
     protected String country;
     private String ammo;
-    private ArrayList<Soldier> soldiers = new ArrayList<>();
 
     public Squad() {
         this.id = 0;

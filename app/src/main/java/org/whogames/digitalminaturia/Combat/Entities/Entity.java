@@ -1,4 +1,4 @@
-package org.whogames.digitalminaturia.Combat;
+package org.whogames.digitalminaturia.Combat.Entities;
 
 public interface Entity {
 

@@ -2,6 +2,9 @@ package org.whogames.digitalminaturia.Combat;
 
 import java.util.HashMap;
 
+import org.whogames.digitalminaturia.Combat.Entities.Firearm;
+import org.whogames.digitalminaturia.Combat.Entities.Vehicle;
+
 public class airSquad extends Squad {
 
     public HashMap<String, Integer> soldiers;

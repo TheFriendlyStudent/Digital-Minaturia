@@ -1,20 +1,36 @@
-package org.whogames.digitalminaturia.Combat;
+package org.whogames.digitalminaturia.Combat.Entities;
 
-public class Ammunition implements Entity {
+public class Vehicle implements Entity {
 
     private String name;
     private String type;
     private String country;
-    private int unit;
+    private int units;
     private double cost;
-    public static String types[] = {"Intermediate Round", "Pistol Round", "SAM", "Rifle Round", "ATGM", "Artillery Shell", "Missile", "Bomb", "Grenade", "RCL Round", "Cannon Round", "Depth Charge", "Torpedo", "AAM", "TBM"};
+    public static String types[] = {"MBT", "Tankette", "Heavy Tank", "Aircraft Carrier", "Disposable Anti Tank Rocket", "Jet Bomber", "Midget Submarine", "Missile Submarine", "Jet Attacker", "VTOL Attacker", "Jet Interceptor", "Light Carrier", "APC", "IFV", "Armored Car", "Light Tank", "Destroyer", "Cruiser", "Jet", "CAS Jet", "SPAA", "Utility Helicopter", "Attack Helicopter", "Transport Helicopter", "Transport Aircraft"};
 
-    public Ammunition(String name, String type, String country, int unit, double cost) {
+    public Vehicle(String name, String type, String country, int units, double cost) {
         this.name = name;
         this.type = type;
         this.country = country;
-        this.unit = unit;
+        this.units = units;
         this.cost = cost;
+    }
+
+    @Override
+    public Object[] getAtts() {
+        return new Object[]{name, type, country, units, cost};
+    }
+
+    @Override
+    public void setAtts(Object[] atts) {
+        if (atts.length == 5) {
+            this.name = (String) atts[0];
+            this.type = (String) atts[1];
+            this.country = (String) atts[2];
+            this.units = (int) atts[3];
+            this.cost = (double) atts[4];
+        }
     }
 
     @Override
@@ -22,31 +38,17 @@ public class Ammunition implements Entity {
         return name;
     }
 
-    public double getCost() {
-        return cost;
-    }
-
     @Override
     public String getCountry() {
         return country;
     }
 
-    @Override
-    public Object[] getAtts() {
-        throw new UnsupportedOperationException("Unimplemented method 'getAtts'");
-    }
-
-    @Override
-    public void setAtts(Object[] atts) {
-        throw new UnsupportedOperationException("Unimplemented method 'setAtts'");
-    }
-
     public String toString() {
-        return "Ammunition{"
+        return "Vehicle{"
                 + "name='" + name + '\''
                 + ", type='" + type + '\''
                 + ", country='" + country + '\''
-                + ", unit=" + unit
+                + ", units=" + units
                 + ", cost=" + cost
                 + '}';
     }
