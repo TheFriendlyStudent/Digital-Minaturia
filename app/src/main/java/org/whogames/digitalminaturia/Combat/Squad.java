@@ -1,5 +1,7 @@
 package org.whogames.digitalminaturia.Combat;
 
+import java.util.ArrayList;
+
 public abstract class Squad {
 
     private int id;
@@ -8,6 +10,7 @@ public abstract class Squad {
     private String type;
     protected String country;
     private String ammo;
+    private ArrayList<Soldier> soldiers = new ArrayList<>();
 
     public Squad() {
         this.id = 0;

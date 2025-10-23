@@ -1,0 +1,243 @@
+[
+	{
+		"name":"Eirikr Guardsmen",
+		"country":"Eirikr",
+		"type":"Infantry",
+		"soldiers":[
+			{
+				"type":"Commanding Officer",
+				"weapons":[
+					{"name":"Sigmagrad Pistol"}
+				],
+				"kit":"Guardsman Kit"
+			},
+			{
+				"type":"Radioman",
+				"weapons":[
+					{"name":"Farmaj Rifle"}
+				],
+				"kit":"Guardsman Kit"
+			},
+			{
+				"type":"Medic",
+				"weapons":[
+					{"name":"Sigmagrad Pistol"}
+				],
+				"kit":"Guardsman Kit"
+			},
+			{
+				"type":"Machine Gunner",
+				"weapons":[
+					{"name":"Farmaj Rifle"}
+				],
+				"kit":"Guardsman Kit"
+			},
+			{
+				"type":"AT Gunner",
+				"weapons":[
+					{"name":"Farmaj Rifle"},
+					{"name":"Petrol Bomb"}
+				],
+				"kit":"Guardsman Kit"
+			},
+			{
+				"type":"Rifleman",
+				"weapons":[
+					{"name":"Farmaj Rifle"}
+				],
+				"kit":"Guardsman Kit"
+			},
+			{
+				"type":"Rifleman",
+				"weapons":[
+					{"name":"Farmaj Rifle"}
+				],
+				"kit":"Guardsman Kit"
+			},
+			{
+				"type":"Rifleman",
+				"weapons":[
+					{"name":"Farmaj Rifle"}
+				],
+				"kit":"Guardsman Kit"
+			},
+			{
+				"type":"Rifleman",
+				"weapons":[
+					{"name":"Farmaj Rifle"}
+				],
+				"kit":"Guardsman Kit"
+			},
+			{
+				"type":"Rifleman",
+				"weapons":[
+					{"name":"Farmaj Rifle"}
+				],
+				"kit":"Guardsman Kit"
+			}
+
+		]
+				
+	},
+	{
+		"name":"E1 Infantry",
+		"country":"Eirikr",
+		"type":"Infantry",
+		"soldiers":[
+			{
+				"type":"Commanding Officer",
+				"weapons":[
+					{"name":"SP-3"}
+				],
+				"kit":"Guardsman Kit"
+			},
+			{
+				"type":"Radioman",
+				"weapons":[
+					{"name":"K-6"}
+				],
+				"kit":"Guardsman Kit"
+			},
+			{
+				"type":"Medic",
+				"weapons":[
+					{"name":"SP-3"}
+				],
+				"kit":"Guardsman Kit"
+			},
+			{
+				"type":"Machine Gunner",
+				"weapons":[
+					{"name":"SA-4"}
+				],
+				"kit":"Guardsman Kit"
+			},
+			{
+				"type":"AT Gunner",
+				"weapons":[
+					{"name":"K-6"},
+					{"name":"SG-1"}
+				],
+				"kit":"Guardsman Kit"
+			},
+			{
+				"type":"Rifleman",
+				"weapons":[
+					{"name":"K-6"}
+				],
+				"kit":"Guardsman Kit"
+			},
+			{
+				"type":"Rifleman",
+				"weapons":[
+					{"name":"K-6"}
+				],
+				"kit":"Guardsman Kit"
+			},
+			{
+				"type":"Rifleman",
+				"weapons":[
+					{"name":"K-6"}
+				],
+				"kit":"Guardsman Kit"
+			},
+			{
+				"type":"Rifleman",
+				"weapons":[
+					{"name":"K-6"}
+				],
+				"kit":"Guardsman Kit"
+			},
+			{
+				"type":"Rifleman",
+				"weapons":[
+					{"name":"K-6"}
+				],
+				"kit":"Guardsman Kit"
+			}
+
+		]
+				
+	},
+	{
+		"name":"Regular Infantry",
+		"country":"Meehanistan",
+		"type":"Infantry",
+		"soldiers":[
+			{
+				"type":"Commanding Officer",
+				"weapons":[
+					{"name":"SP-3"}
+				],
+				"kit":"M2 Kit"
+			},
+			{
+				"type":"Radioman",
+				"weapons":[
+					{"name":"MS-1"}
+				],
+				"kit":"M2 Kit"
+			},
+			{
+				"type":"Medic",
+				"weapons":[
+					{"name":"TMA-10b"}
+				],
+				"kit":"M2 Kit"
+			},
+			{
+				"type":"Machine Gunner",
+				"weapons":[
+					{"name":"SMP-12"}
+				],
+				"kit":"M2 Kit"
+			},
+			{
+				"type":"AT Gunner",
+				"weapons":[
+					{"name":"TMA-10b"},
+					{"name":"RG-1"}
+				],
+				"kit":"M2 Kit"
+			},
+			{
+				"type":"AT Gunner",
+				"weapons":[										
+					{"name":"TMA-10b"},
+					{"name":"RG-1"}
+				],
+				"kit":"M2 Kit"
+			},
+			{
+				"type":"Rifleman",
+				"weapons":[
+					{"name":"TMA-10"}
+				],
+				"kit":"M2 Kit"
+			},
+			{
+				"type":"Rifleman",
+				"weapons":[
+					{"name":"TMA-10"}
+				],
+				"kit":"M2 Kit"
+			},
+			{
+				"type":"Rifleman",
+				"weapons":[
+					{"name":"TMA-10"}
+				],
+				"kit":"M2 Kit"
+			},
+			{
+				"type":"Marksman",
+				"weapons":[
+					{"name":"MS-1"}
+				],
+				"kit":"M2 Kit"
+			}
+
+		]
+				
+	}		
+]
