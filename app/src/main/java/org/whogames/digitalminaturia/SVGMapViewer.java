@@ -765,6 +765,8 @@ canvasMap.get("Map Layer").addGVTTreeRendererListener(new GVTTreeRendererAdapter
                 frame.add(topPanel, BorderLayout.NORTH);
                 frame.add(infoPanel, BorderLayout.WEST);
                 frame.add(scrollPane, BorderLayout.CENTER);
+                CardLayout c = (CardLayout)cards.getLayout();
+                c.show(cards, "Map Layer");
                 frame.pack();
                 frame.setLocationRelativeTo(null);
                 frame.setVisible(true);
