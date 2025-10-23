@@ -7,7 +7,11 @@ public class Vehicle implements Entity {
     private String country;
     private int units;
     private double cost;
-    public static String types[] = {"MBT", "Tankette", "Heavy Tank", "Aircraft Carrier", "Disposable Anti Tank Rocket", "Jet Bomber", "Midget Submarine", "Missile Submarine", "Jet Attacker", "VTOL Attacker", "Jet Interceptor", "Light Carrier", "APC", "IFV", "Armored Car", "Light Tank", "Destroyer", "Cruiser", "Jet", "CAS Jet", "SPAA", "Utility Helicopter", "Attack Helicopter", "Transport Helicopter", "Transport Aircraft"};
+    public static String types[] = {"MBT", "Tankette", "Heavy Tank", "Aircraft Carrier", 
+    "Disposable Anti Tank Rocket", "Jet Bomber", "Midget Submarine", "Missile Submarine", 
+    "Jet Attacker", "VTOL Attacker", "Jet Interceptor", "Light Carrier", "APC", "IFV", 
+    "Armored Car", "Light Tank", "Destroyer", "Cruiser", "Jet", "CAS Jet", "SPAA", 
+    "Utility Helicopter", "Attack Helicopter", "Transport Helicopter", "Transport Aircraft"};
 
     public Vehicle(String name, String type, String country, int units, double cost) {
         this.name = name;

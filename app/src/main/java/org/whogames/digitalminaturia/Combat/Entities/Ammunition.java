@@ -7,7 +7,9 @@ public class Ammunition implements Entity {
     private String country;
     private int unit;
     private double cost;
-    public static String types[] = {"Intermediate Round", "Pistol Round", "SAM", "Rifle Round", "ATGM", "Artillery Shell", "Missile", "Bomb", "Grenade", "RCL Round", "Cannon Round", "Depth Charge", "Torpedo", "AAM", "TBM"};
+    public static String types[] = {"Intermediate Round", "Pistol Round", "SAM", "Rifle Round", "ATGM", 
+    "Artillery Shell", "Missile", "Bomb", "Grenade", "RCL Round", "Cannon Round", "Depth Charge", 
+    "Torpedo", "AAM", "TBM"};
 
     public Ammunition(String name, String type, String country, int unit, double cost) {
         this.name = name;

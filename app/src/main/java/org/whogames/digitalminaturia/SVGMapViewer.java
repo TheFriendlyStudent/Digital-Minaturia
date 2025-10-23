@@ -194,7 +194,7 @@ public class SVGMapViewer {
         CompletableFuture.allOf(countriesFuture, provincesFuture, techFuture).join();
 
         // Collect results
-        countryList = new ArrayList<Country>(countriesFuture.join());
+        countryList = new ArrayList<>(countriesFuture.join());
         provinceMap = new HashMap<Integer, Province>(provincesFuture.join());
         technologyList = new ArrayList<Entity>(techFuture.join());
 
