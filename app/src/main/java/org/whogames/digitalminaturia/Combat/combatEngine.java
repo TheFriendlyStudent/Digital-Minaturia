@@ -1,6 +1,5 @@
 package org.whogames.digitalminaturia.Combat;
 
-import java.util.List;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -13,7 +12,7 @@ import org.whogames.digitalminaturia.SVGMapViewer;
 
 public class combatEngine {
 
-    private ArrayList<List<Edge>> adjList;
+    private ArrayList<ArrayList<Edge>> adjList = new ArrayList<>();
     private ArrayList<Province> provinces;
 
     public combatEngine() {
@@ -26,10 +25,10 @@ public class combatEngine {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        this.provinces = SVGMapViewer.provinceList;
+        this.provinces = new ArrayList<>(SVGMapViewer.provinceMap.values().stream().toList());
 
         for (Province p : provinces) {
-            System.out.print(p.getName() + " borders: ");
+            System.out.print(p.getId() + "(" + p.getName() + ")" + " borders: ");
                 for (Province n : p.getNeighboringProvinces()) {
                     System.out.print(n.getName() + " ");
                 }   

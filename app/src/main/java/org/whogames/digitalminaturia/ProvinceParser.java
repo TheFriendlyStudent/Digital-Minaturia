@@ -51,8 +51,9 @@ public class ProvinceParser {
     }, 0, 1, TimeUnit.SECONDS);
     }
 
-    public static ArrayList<Province> parseProvinces(Reader reader) throws IOException {
-        ArrayList<Province> provinces = new ArrayList<>();
+    public static Map<Integer, Province> parseProvinces(Reader reader) throws IOException {
+        System.out.println("[DEBUG] Starting parseProvinces...");
+        Map<Integer, Province> provinces = new HashMap<>();
         BufferedReader br = new BufferedReader(reader);
         String line;
 
@@ -82,7 +83,7 @@ public class ProvinceParser {
 
                 Province province = new Province(id, name, country, language, population,
                         terrain, tier, cityType, budget1, budget2);
-                provinces.add(province);
+                provinces.put(id, province);
 
             } catch (NumberFormatException e) {
                 System.err.println("Number format error in line: " + line);
@@ -92,8 +93,12 @@ public class ProvinceParser {
         return provinces;
     }
 
-    public static ArrayList<List<Edge>> parseEdges(Reader reader) throws IOException {
-        ArrayList<List<Edge>> adjList = new ArrayList<>();
+    public static ArrayList<ArrayList<Edge>> parseEdges(Reader reader) throws IOException {
+        System.out.println("[DEBUG] Starting parseProvinces...");
+        ArrayList<ArrayList<Edge>> adjList = new ArrayList<>();
+        while (adjList.size() <= 254) {
+            adjList.add(new ArrayList<>());
+        }
         BufferedReader br = new BufferedReader(reader);
         String line;
 
@@ -115,10 +120,12 @@ public class ProvinceParser {
                 int weight = Integer.parseInt(tokens[2].trim());
 
                 Edge edge1 = new Edge(fromID, toID, weight);
+                Edge edge2 = new Edge(toID, fromID, weight);
+
+                // Now safe to add edges
                 adjList.get(fromID).add(edge1);
 
                 // For an undirected graph, add the edge in both directions
-                Edge edge2 = new Edge(fromID, toID, weight);
                 adjList.get(toID).add(edge2);
 
                 SVGMapViewer.getProvinceById(fromID).getNeighboringProvinces().add(SVGMapViewer.getProvinceById(toID));
@@ -133,6 +140,7 @@ public class ProvinceParser {
     }
 
     public static ArrayList<Country> parseCountries(Reader reader) throws IOException {
+        System.out.println("[DEBUG] Starting parseProvinces...");
         ArrayList<Country> countries = new ArrayList<>();
         BufferedReader br = new BufferedReader(reader);
         String line;
@@ -183,6 +191,7 @@ public class ProvinceParser {
     }
 
     public static ArrayList<Entity> parseItems(Reader reader) throws IOException {
+        System.out.println("[DEBUG] Starting parseProvinces...");
         ArrayList<Entity> technology = new ArrayList<>();
         BufferedReader br = new BufferedReader(reader);
         String line;
@@ -318,6 +327,8 @@ public class ProvinceParser {
     }
 
     public static void parseInventory(Reader reader, Country country, HashMap<String, Entity> entityMap) throws IOException {
+        System.out.println("[DEBUG] Starting parseProvinces...");
+
         BufferedReader br = new BufferedReader(reader);
         String line;
 

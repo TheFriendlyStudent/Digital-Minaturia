@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -86,7 +87,7 @@ import org.whogames.digitalminaturia.Combat.combatEngine;
 public class SVGMapViewer {
 
     private Element selectedElement = null;
-    public static ArrayList<Province> provinceList = new ArrayList<>();
+    public static Map<Integer, Province> provinceMap = new HashMap<>();
     public static ArrayList<Country> countryList = new ArrayList<>();
     private static ArrayList<Entity> technologyList = new ArrayList<>();
 
@@ -96,7 +97,8 @@ public class SVGMapViewer {
     private final String[] SvgFiles = new String[]{"Map Layer", "Economy Layer", "Production Layer", "Research Layer", "Squad Design Layer"};
 
     private static HashMap<String, JSVGCanvas> canvasMap = new HashMap<>();
-    private static HashMap<String, JLayeredPane> layeredPaneMap = new HashMap<>();  
+    private static HashMap<String, JLayeredPane> layeredPaneMap = new HashMap<>();
+    private static HashMap<String, JTextField> fields = new HashMap<>();  
 
     private static JFrame frame;
     private static JPanel cards;
@@ -120,11 +122,19 @@ public class SVGMapViewer {
 
     private static combatEngine combatSim = null;
 
-    public SVGMapViewer() throws Exception {
-        createAndShowGUI();
+    public SVGMapViewer() {
+        System.err.println(">>> SVGMapViewer constructor: start");
+        try {
+            createAndShowGUI();
+        } catch (Exception e) {
+            System.err.println(">>> Exception inside constructor:");
+            e.printStackTrace(System.err);
+        }
     }
 
+
     public void loadResources() throws FileNotFoundException, IOException {
+        System.out.println("[DEBUG] loadResources() CALLED");
         // Ensure the data folder exists
         if (!dataDir.exists()) {
             dataDir.mkdirs();
@@ -154,24 +164,28 @@ public class SVGMapViewer {
                 return ProvinceParser.parseCountries(new FileReader(new File(dataDir, "Minaturia Countries.csv")));
             } catch (IOException e) {
                 e.printStackTrace();
+                System.err.println("[ERROR] Failed to parse countries:");
                 return List.of(); // fallback
             }
         }, executor);
 
-        CompletableFuture<List<Province>> provincesFuture = CompletableFuture.supplyAsync(() -> {
+        CompletableFuture<Map<Integer, Province>> provincesFuture = CompletableFuture.supplyAsync(() -> {
             try {
-                return ProvinceParser.parseProvinces(new FileReader(new File(dataDir, "Minaturia Provinces.csv")));
+                return ProvinceParser.parseProvinces(new FileReader(new File(dataDir, "Minaturia Provinces.csv"))); 
             } catch (IOException e) {
                 e.printStackTrace();
-                return List.of();
+                System.err.println("[ERROR] Failed to parse provinces:");
+                return Map.of();
             }
         }, executor);
+
 
         CompletableFuture<List<Entity>> techFuture = CompletableFuture.supplyAsync(() -> {
             try {
                 return ProvinceParser.parseItems(new FileReader(new File(dataDir, "Minaturia Technology.csv")));
             } catch (IOException e) {
                 e.printStackTrace();
+                System.err.println("[ERROR] Failed to parse countries:");
                 return List.of();
             }
         }, executor);
@@ -180,11 +194,13 @@ public class SVGMapViewer {
         CompletableFuture.allOf(countriesFuture, provincesFuture, techFuture).join();
 
         // Collect results
-        countryList = (ArrayList<Country>) countriesFuture.join();
-        provinceList = (ArrayList<Province>) provincesFuture.join();
-        technologyList = (ArrayList<Entity>) techFuture.join();
+        countryList = new ArrayList<Country>(countriesFuture.join());
+        provinceMap = new HashMap<Integer, Province>(provincesFuture.join());
+        technologyList = new ArrayList<Entity>(techFuture.join());
 
-        executor.shutdown();
+        System.err.println("[DEBUG] Parsed " + provinceMap.size() + " provinces.");
+        System.err.println("[DEBUG] Parsed " + countryList.size() + " countries.");
+        System.err.println("[DEBUG] Parsed " + technologyList.size() + " tech items.");
         combatSim = new combatEngine();
 
         for (Entity tech : technologyList) {
@@ -192,11 +208,14 @@ public class SVGMapViewer {
         }
         for (Country country : countryList) {
             File invFile = new File(dataDir, country.getName() + " Inventory.csv");
+            System.err.println("[DEBUG] Loading inventory for country: " + country.getName());
             if (!invFile.exists()) {
                 invFile.createNewFile();
             }
             ProvinceParser.parseInventory(new FileReader(invFile), country, entityMap);
         }
+
+        executor.shutdown();
 
     }
 
@@ -365,16 +384,25 @@ public class SVGMapViewer {
         infoPanel.setPreferredSize(new Dimension(300, 980));
         infoPanel.setBackground(Color.BLACK);
 
-        JTextField nameField = null, languageField = null, populationField = null, terrainField = null, tierField = null, 
-        cityTypeField = null, budget1Field = null, budget2Field = null;
+        JTextField nameField = createBlinkingCaretField(10);
+        fields.put("nameField", nameField);
+        JTextField languageField = createBlinkingCaretField(10);
+        fields.put("languageField", languageField);
+        JTextField populationField = createBlinkingCaretField(10);
+        fields.put("populationField", populationField);
+        JTextField terrainField = createBlinkingCaretField(10);
+        fields.put("terrainField", terrainField);
+        JTextField tierField = createBlinkingCaretField(10);
+        fields.put("tierField", tierField);
+        JTextField cityTypeField = createBlinkingCaretField(10);
+        fields.put("cityTypeField", cityTypeField);
+        JTextField budget1Field = createBlinkingCaretField(10);
+        fields.put("budget1Field", budget1Field);
+        JTextField budget2Field = createBlinkingCaretField(10);
+        fields.put("budget2Field", budget2Field);
 
-        JTextField[] fields = {
-            nameField, languageField, populationField,
-            terrainField, tierField, cityTypeField, budget1Field, budget2Field
-        };
-
-        for (JTextField field : fields) {
-            field = createBlinkingCaretField(10);
+        for (Map.Entry<String, JTextField> entry : fields.entrySet()) {
+            JTextField field = entry.getValue();
             styleTextField(field);
         }
 
@@ -393,7 +421,7 @@ public class SVGMapViewer {
                     currentProvince.setBudget1(Long.parseLong(budget1Field.getText()));
                     currentProvince.setBudget2(Long.parseLong(budget2Field.getText()));
 
-                ProvinceParser.writeProvincesToCSV(provinceList, new File(dataDir, "Minaturia Provinces.csv").getAbsolutePath());
+                ProvinceParser.writeProvincesToCSV(new ArrayList<Province>(provinceMap.values().stream().toList()), new File(dataDir, "Minaturia Provinces.csv").getAbsolutePath());
 
                     JOptionPane.showMessageDialog(frame, "Changes saved.");
                 } catch (Exception ex) {
@@ -405,14 +433,14 @@ public class SVGMapViewer {
             }
         });
 
-        addField(infoPanel, "Name:", nameField, consoleFont);
-        addField(infoPanel, "Language:", languageField, consoleFont);
-        addField(infoPanel, "Population:", populationField, consoleFont);
-        addField(infoPanel, "Terrain:", terrainField, consoleFont);
-        addField(infoPanel, "Tier:", tierField, consoleFont);
-        addField(infoPanel, "City Type:", cityTypeField, consoleFont);
-        addField(infoPanel, "Food Production:", budget1Field, consoleFont);
-        addField(infoPanel, "Fuel Production:", budget2Field, consoleFont);
+        addField(infoPanel, "Name:", nameField);
+        addField(infoPanel, "Language:", languageField);
+        addField(infoPanel, "Population:", populationField);
+        addField(infoPanel, "Terrain:", terrainField);
+        addField(infoPanel, "Tier:", tierField);
+        addField(infoPanel, "City Type:", cityTypeField);
+        addField(infoPanel, "Food Production:", budget1Field);
+        addField(infoPanel, "Fuel Production:", budget2Field);
         infoPanel.add(Box.createRigidArea(new Dimension(0, 5)));
         infoPanel.add(updateButton);
 
@@ -469,102 +497,116 @@ public class SVGMapViewer {
         });
 
         // Province click listeners as before...
-        canvasMap.get("Map Layer").addGVTTreeRendererListener(new GVTTreeRendererAdapter() {
-            public void gvtRenderingCompleted(GVTTreeRendererEvent e) {
-                canvasMap.get("Map Layer").getUpdateManager().getUpdateRunnableQueue().invokeLater(() -> {
-                    Document doc = canvasMap.get("Map Layer").getSVGDocument();
-                    Element layerMap = doc.getElementById("Layer_map");
+canvasMap.get("Map Layer").addGVTTreeRendererListener(new GVTTreeRendererAdapter() {
+    @Override
+    public void gvtRenderingCompleted(GVTTreeRendererEvent e) {
+        canvasMap.get("Map Layer")
+                 .getUpdateManager()
+                 .getUpdateRunnableQueue()
+                 .invokeLater(() -> {
 
-                    if (layerMap == null) {
-                        System.out.println("Layer_map NOT found!");
+            Document doc = canvasMap.get("Map Layer").getSVGDocument();
+            Element layerMap = doc.getElementById("Layer_map");
+
+            if (layerMap == null) {
+                System.out.println("Layer_map NOT found!");
+                return;
+            }
+
+            NodeList children = layerMap.getElementsByTagName("*");
+            for (int i = 0; i < children.getLength(); i++) {
+                Element el = (Element) children.item(i);
+                String idAttr = el.getAttribute("id");
+                if (idAttr == null || idAttr.isEmpty()) continue;
+
+                final int provinceId;
+                try {
+                    provinceId = Integer.parseInt(idAttr.replaceAll("[^\\d]", ""));
+                } catch (NumberFormatException ex) {
+                    System.err.println("Invalid province ID: " + idAttr);
+                    continue;
+                }
+
+                Province prov = provinceMap.get(provinceId);
+                if (prov == null) continue;
+
+                // Set initial fill style
+                String encID = prov.getCountry().replace("'", "").replaceAll("\\s+", "-");
+                el.setAttribute("style", "fill: url(#" + encID + ");");
+                el.setAttribute("pointer-events", "visiblePainted");
+
+                // Attach tooltip
+                attachTooltipListeners(el, prov.getName());
+
+                // Add click listener
+                EventTarget target = (EventTarget) el;
+                target.addEventListener("click", evt -> {
+
+                    // Deselect if clicking the same element
+                    if (selectedElement == el) {
+                        if (currentProvince != null) {
+                            String resetID = currentProvince.getCountry()
+                                                           .replace("'", "")
+                                                           .replaceAll("\\s+", "-");
+                            el.setAttribute("style", "fill: url(#" + resetID + ");");
+                        }
+                        selectedElement = null;
+                        currentProvince = null;
+                        currentProvinceIndex = -1;
+                        clearInfoFields();
                         return;
                     }
 
-                    NodeList children = layerMap.getElementsByTagName("*");
-                    for (int i = 0; i < children.getLength(); i++) {
-                        Element el = (Element) children.item(i);
-                        String id = el.getAttribute("id");
+                    // Select new province
+                    currentProvinceIndex = provinceId;
+                    currentProvince = prov;
 
-                        int provinceId;
-                        
-                        try {
-                            provinceId = Integer.parseInt(id.replaceAll("[^\\d]", ""));
-                        } catch (NumberFormatException ex) {
-                            System.err.println("Invalid province ID: " + id);
-                            continue;
-                        }
+                    updateInfoPanel(
+                        prov.getName(),
+                        prov.getLanguage(),
+                        String.valueOf(prov.getPopulation()),
+                        prov.getTerrain(),
+                        String.valueOf(prov.getTier()),
+                        prov.getCityType(),
+                        String.valueOf(prov.getBudget1()),
+                        String.valueOf(prov.getBudget2())
+                    );
 
-                        String encID = provinceList.get(provinceId - 1).getCountry().replace("'", "").replaceAll("\\s+", "-");
-                        el.setAttribute("style", "fill: url(#" + encID + ");");
-                        attachTooltipListeners(el, provinceList.get(provinceId-1).getName());
+                    Country country = getCountryByName(prov.getCountry());
+                    if (country != null) {
+                        updateTopPanel(country.getName().toUpperCase(),
+                                       country.getCapital(),
+                                       String.valueOf(country.getPopulation()));
+                        updateResourceOptionsForCountry(country.getName());
+                        updateProductionLayer(country);
+                    } else {
+                        updateTopPanel(prov.getCountry().toUpperCase(), "Unknown", "Unknown");
+                        updateResourceOptionsForCountry(null);
+                    }
 
-                        // Enable pointer events
-                        el.setAttribute("pointer-events", "visiblePainted");
-
-                        if (id != null && !id.isEmpty()) {
-                            EventTarget target = (EventTarget) el;
-
-                            target.addEventListener("click", evt -> {
-                                int pId;
-                                try {
-                                    pId = Integer.parseInt(id.replaceAll("[^\\d]", ""));
-                                } catch (NumberFormatException ex) {
-                                    System.err.println("Invalid province ID: " + id);
-                                    return;
-                                }
-
-                                if (selectedElement == el) {
-                                    String encoID = currentProvince.getCountry().replace("'", "");  // escape apostrophes
-                                    encoID = encoID.replaceAll("\\s+", "-");  
-                                    el.setAttribute("style", "fill: url(#" + encoID + ");");
-                                    selectedElement = null;
-                                    currentProvince = null;
-                                    currentProvinceIndex = -1;
-
-                                    clearInfoFields();
-                                    return;
-                                }
-
-                                currentProvinceIndex = pId - 1;
-                                currentProvince = provinceList.get(currentProvinceIndex);
-
-                                updateInfoPanel(currentProvince.getName(), currentProvince.getLanguage(), String.valueOf(currentProvince.getPopulation()),
-                                currentProvince.getTerrain(), String.valueOf(currentProvince.getTier()), currentProvince.getCityType(),
-                                String.valueOf(currentProvince.getBudget1()), String.valueOf(currentProvince.getBudget2()));
-
-                                Country country = getCountryByName(currentProvince.getCountry());
-
-                                if (country != null) {
-                                    updateTopPanel(country.getName().toUpperCase(), 
-                                    country.getCapital(), "" + country.getPopulation());
-
-                                    updateResourceOptionsForCountry(country.getName());
-                                    updateProductionLayer(country);
-                                } else {
-
-                                    updateTopPanel(currentProvince.getCountry().toUpperCase(), 
-                                    "Unknown", "Unknown");
-
-                                    updateResourceOptionsForCountry(null);
-                                }
-
-                                if (selectedElement != null && selectedElement != el) {
-                                    String enceID = provinceList.get(Integer.parseInt(selectedElement.getAttribute("id"))-1).getCountry().replace("'", "");  // escape apostrophes
-                                    enceID = enceID.replaceAll("\\s+", "-");  
-                                    selectedElement.setAttribute("style", "fill: url(#" + enceID + ");");
-                                }
-
-                                el.setAttribute("style", "fill:white;stroke:white;stroke-width:1;");
-                                selectedElement = el;
-                            }, false);
+                    // Reset previous selection style
+                    if (selectedElement != null && selectedElement != el) {
+                        String prevID = selectedElement.getAttribute("id").replaceAll("[^\\d]", "");
+                        Province prevProv = provinceMap.get(Integer.valueOf(prevID));
+                        if (prevProv != null) {
+                            String prevEnc = prevProv.getCountry().replace("'", "").replaceAll("\\s+", "-");
+                            selectedElement.setAttribute("style", "fill: url(#" + prevEnc + ");");
                         }
                     }
-                });
+
+                    // Highlight current selection
+                    el.setAttribute("style", "fill:white;stroke:white;stroke-width:1;");
+                    selectedElement = el;
+
+                }, false);
             }
         });
     }
+});
+
+    }
     
-    private void setZoom(JScrollPane scrollPane) throws IOException {
+    private void setZoom(JScrollPane scrollPane) throws IOException, InterruptedException, ExecutionException {
 
         ExecutorService svgExecutor = Executors.newFixedThreadPool(
             Math.min(SvgFiles.length, Runtime.getRuntime().availableProcessors())
@@ -583,7 +625,7 @@ public class SVGMapViewer {
                     Document parsedDoc = factory.createDocument(s.toURI().toString());
 
                     // Create the canvas and layer structure safely on EDT
-                    SwingUtilities.invokeLater(() -> {
+                    SwingUtilities.invokeAndWait(() -> {
                         JSVGCanvas svgCan = new JSVGCanvas();
                         svgCan.setDocumentState(JSVGCanvas.ALWAYS_DYNAMIC);
                         svgCan.setBackground(Color.BLACK);
@@ -639,7 +681,8 @@ public class SVGMapViewer {
                         layeredPaneMap.put(svgFi, jlp);
 
                         cards.add(jlp, svgFi);
-                    });
+
+                        });
 
                 } catch (Exception ex) {
                     ex.printStackTrace();
@@ -649,12 +692,16 @@ public class SVGMapViewer {
 
         // Wait for all parsing tasks to complete before continuing
         for (Future<?> f : futures) {
+            f.get();
+        }
+
+        SwingUtilities.invokeLater(() -> {
             try {
-                f.get();
-            } catch (Exception e) {
+                styleCards();
+            } catch (IOException e) {
                 e.printStackTrace();
             }
-        }
+        });
 
         svgExecutor.shutdown();
 
@@ -698,13 +745,12 @@ public class SVGMapViewer {
         infoPanel = createInfoPanel();
         cards = new JPanel(new CardLayout());
         scrollPane = createStyledScrollPane(cards);
-        styleCards();
 
         SwingWorker<Void, Void> loader = new SwingWorker<>() {
         @Override
         protected Void doInBackground() throws Exception {
             // Runs off EDT
-            loadResources();   // CSVs, entity maps, inventories
+            loadResources();
             setZoom(scrollPane); // SVG parsing, JSVGCanvas setup
             return null;
         }
@@ -730,7 +776,7 @@ public class SVGMapViewer {
         }
     };
 
-    loader.execute(); 
+    loader.execute();
 
     }
 
@@ -773,22 +819,14 @@ public class SVGMapViewer {
     private void updateInfoPanel(String nameField, String languageField, String populationField,
             String terrainField, String tierField, String cityTypeField,
             String budget1Field, String budget2Field) {
-                JTextField nameField1 = (JTextField) infoPanel.getComponent(0);
-                nameField1.setText(nameField);
-                JTextField languageField1 = (JTextField) infoPanel.getComponent(2);
-                languageField1.setText(languageField);
-                JTextField populationField1 = (JTextField) infoPanel.getComponent(4);
-                populationField1.setText(populationField);
-                JTextField terrainField1 = (JTextField) infoPanel.getComponent(6);
-                terrainField1.setText(terrainField);
-                JTextField tierField1 = (JTextField) infoPanel.getComponent(8);
-                tierField1.setText(tierField);
-                JTextField cityTypeField1 = (JTextField) infoPanel.getComponent(10);
-                cityTypeField1.setText(cityTypeField);
-                JTextField budget1Field1 = (JTextField) infoPanel.getComponent(12);
-                budget1Field1.setText(budget1Field);
-                JTextField budget2Field1 = (JTextField) infoPanel.getComponent(14);
-                budget2Field1.setText(budget2Field);
+                fields.get("nameField").setText(nameField);
+                fields.get("languageField").setText(languageField);
+                fields.get("populationField").setText(populationField);
+                fields.get("terrainField").setText(terrainField);
+                fields.get("tierField").setText(tierField);
+                fields.get("cityTypeField").setText(cityTypeField);
+                fields.get("budget1Field").setText(budget1Field);
+                fields.get("budget2Field").setText(budget2Field);
             }
 
     private void updateInventoryForCountry(String country) {
@@ -905,22 +943,22 @@ public class SVGMapViewer {
     }
 
     private JTextField createBlinkingCaretField(int columns) {
-    JTextField field = new JTextField(columns);
-    Caret caret = new DefaultCaret() {
-        @Override
-        protected synchronized void damage(Rectangle r) {
-            if (r == null) return;
-            x = r.x;
-            y = r.y;
-            width = 1;
-            height = r.height;
-            repaint();
-        }
-    };
-    caret.setBlinkRate(500);
-    field.setCaret(caret);
-    return field;
-}
+        JTextField field = new JTextField(columns);
+        Caret caret = new DefaultCaret() {
+            @Override
+            protected synchronized void damage(Rectangle r) {
+                if (r == null) return;
+                x = r.x;
+                y = r.y;
+                width = 1;
+                height = r.height;
+                repaint();
+            }
+        };
+        caret.setBlinkRate(500);
+        field.setCaret(caret);
+        return field;
+    }
 
     private void showStyledDialog(String message) {
         JTextArea textArea = new JTextArea(message);
@@ -945,14 +983,9 @@ public class SVGMapViewer {
         dialog.setVisible(true);
     }
 
-    public static Province getProvinceById(int fromID) {
-        for (Province province : provinceList) {
-            if (province.getId() == fromID) {
-                return province;
-            }
-        }
-        return null;
-    }
+public static Province getProvinceById(int id) {
+    return provinceMap.get(id); // returns null if ID not found
+}
 
     private void createSquadDialog() {
     
@@ -1045,11 +1078,11 @@ public class SVGMapViewer {
     }
 }
 
-    private void addField(JPanel panel, String labelText, JTextField field, Font font) {
+    private void addField(JPanel panel, String labelText, JTextField field) {
         JLabel label = new JLabel(labelText);
-        label.setFont(font);
+        label.setFont(consoleFont);
         label.setForeground(Color.WHITE);
-        field.setFont(font);
+        field.setFont(consoleFont);
         panel.add(label);
         panel.add(field);
         panel.add(Box.createRigidArea(new Dimension(0, 5)));
