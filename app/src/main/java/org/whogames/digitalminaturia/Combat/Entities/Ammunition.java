@@ -5,27 +5,32 @@ public class Ammunition implements Entity {
     private String name;
     private String type;
     private String country;
-    private int unit;
-    private double cost;
+    private double pcost;
+    private double lcost;
+    private int damage;
     public static String types[] = {"Intermediate Round", "Pistol Round", "SAM", "Rifle Round", "ATGM", 
     "Artillery Shell", "Missile", "Bomb", "Grenade", "RCL Round", "Cannon Round", "Depth Charge", 
     "Torpedo", "AAM", "TBM"};
 
-    public Ammunition(String name, String type, String country, int unit, double cost) {
+    public Ammunition(String name, String type, String country, int cost) {
         this.name = name;
         this.type = type;
         this.country = country;
-        this.unit = unit;
-        this.cost = cost;
+        this.pcost = cost;
+    }
+
+    public Ammunition(String name, String country, String type, double pcost, double lcost, int damage) {
+        this.name = name;
+        this.type = type;
+        this.country = country;
+        this.pcost = pcost;
+        this.lcost = lcost;
+        this.damage = damage;
     }
 
     @Override
     public String getName() {
         return name;
-    }
-
-    public double getCost() {
-        return cost;
     }
 
     @Override
@@ -48,8 +53,6 @@ public class Ammunition implements Entity {
                 + "name='" + name + '\''
                 + ", type='" + type + '\''
                 + ", country='" + country + '\''
-                + ", unit=" + unit
-                + ", cost=" + cost
                 + '}';
     }
 

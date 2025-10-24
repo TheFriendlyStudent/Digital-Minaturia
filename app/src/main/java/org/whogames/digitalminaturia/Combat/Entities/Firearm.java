@@ -4,20 +4,33 @@ public class Firearm extends Weapon {
 
     private String name;
     private String type;
-    private int units;
     private String country;
-    private double cost;
-    private int damage;
+    private double pcost;
+    private double lcost;
+    private Ammunition ammunition;
+    private int capacity;
     private int fireRate;
     private int reloadTime;
+
+    public Firearm(String name, String country, String type, double pcost, double lcost, Ammunition ammunition, int capacity, int fireRate, int reloadTime) {
+        super(20);
+        this.name = name;
+        this.type = type;
+        this.country = country;
+        this.pcost = pcost;
+        this.capacity = capacity;
+        this.lcost = lcost;
+        this.ammunition = ammunition;
+        this.capacity = capacity;
+        this.fireRate = fireRate;
+        this.reloadTime = reloadTime;
+    }
 
     public Firearm(String name, String type, String country, int units, int damage, double cost) {
         super(damage);
         this.name = name;
         this.type = type;
         this.country = country;
-        this.units = units;
-        this.cost = cost;
     }
 
     public Firearm(String name, String type, String country, int units, double cost) {
@@ -25,13 +38,12 @@ public class Firearm extends Weapon {
         this.name = name;
         this.type = type;
         this.country = country;
-        this.units = units;
-        this.cost = cost;
+
     }
 
     @Override
     public Object[] getAtts() {
-        return new Object[]{name, type, units, cost};
+        return new Object[]{name, type, country, pcost, lcost, ammunition, capacity, fireRate, reloadTime};
     }
 
     @Override
@@ -54,9 +66,7 @@ public class Firearm extends Weapon {
         return "Firearm{"
                 + "name='" + name + '\''
                 + ", type='" + type + '\''
-                + ", units=" + units
                 + ", country='" + country + '\''
-                + ", cost=" + cost
                 + '}';
     }
 
