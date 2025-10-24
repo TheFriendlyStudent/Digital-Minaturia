@@ -1,5 +1,7 @@
 package org.whogames.digitalminaturia.Combat.Entities;
 
+import java.util.HashMap;
+
 public class Vehicle implements Entity {
 
     private String name;
@@ -7,6 +9,8 @@ public class Vehicle implements Entity {
     private String country;
     private int units;
     private double cost;
+    private int durability;
+    private int armor;
     private HashMap<String, Weapon> weapons;
     public static String types[] = {"MBT", "Tankette", "Heavy Tank", "Aircraft Carrier", 
     "Disposable Anti Tank Rocket", "Jet Bomber", "Midget Submarine", "Missile Submarine", 
