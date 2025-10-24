@@ -5,10 +5,10 @@ import java.util.HashMap;
 public class Vehicle implements Entity {
 
     private String name;
-    private String type;
     private String country;
-    private int units;
-    private double cost;
+    private String type;
+    private double pcost;
+    private double lcost;
     private int durability;
     private int armor;
     private HashMap<String, Weapon> weapons;
@@ -22,13 +22,13 @@ public class Vehicle implements Entity {
         this.name = name;
         this.type = type;
         this.country = country;
-        this.units = units;
-        this.cost = cost;
+        this.lcost = units;
+        this.pcost = cost;
     }
 
     @Override
     public Object[] getAtts() {
-        return new Object[]{name, type, country, units, cost};
+        return new Object[]{name, type, country, lcost, pcost};
     }
 
     @Override
@@ -37,8 +37,6 @@ public class Vehicle implements Entity {
             this.name = (String) atts[0];
             this.type = (String) atts[1];
             this.country = (String) atts[2];
-            this.units = (int) atts[3];
-            this.cost = (double) atts[4];
         }
     }
 
@@ -57,8 +55,6 @@ public class Vehicle implements Entity {
                 + "name='" + name + '\''
                 + ", type='" + type + '\''
                 + ", country='" + country + '\''
-                + ", units=" + units
-                + ", cost=" + cost
                 + '}';
     }
 

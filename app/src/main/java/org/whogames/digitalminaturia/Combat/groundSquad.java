@@ -9,6 +9,9 @@ public class groundSquad extends Squad {
     public HashMap<String, Soldier> soldiers;
     public HashMap<Vehicle, Integer> vehicles;
 
+    private final static int minPersonnel = 2;
+    private final static int maxPersonnel = 10;
+
     private int APDamage, ATDamage, Penetration;
 
     public groundSquad(int id, String name, String country) {
