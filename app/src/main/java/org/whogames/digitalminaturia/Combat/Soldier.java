@@ -20,4 +20,9 @@ public class Soldier {
         this.canDrive = type.equals("Mechanic");
     }
 
+    public String getType() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getType'");
+    }
+
 }
