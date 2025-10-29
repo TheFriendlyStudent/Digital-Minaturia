@@ -23,6 +23,9 @@ import org.whogames.digitalminaturia.Combat.Entities.Entity;
 import org.whogames.digitalminaturia.Combat.Entities.Firearm;
 import org.whogames.digitalminaturia.Combat.Entities.Vehicle;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 public class ProvinceParser {
 
     private static final File dataDir = new File(System.getProperty("user.home"), "MinaturiaData");
@@ -190,6 +193,28 @@ public class ProvinceParser {
         return countries;
     }
 
+    public static void parseNewItems() {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+
+            // Option 1: Read from file
+            List<Ammunition> ammoList = mapper.readValue(
+                new File(dataDir, "Minaturia Ammunition.json"),
+                new TypeReference<List<Ammunition>>() {}
+            );
+
+            // Option 2: Read from string
+            // String json = "[{...}]";
+            // List<Ammunition> ammoList = mapper.readValue(json, new TypeReference<List<Ammunition>>() {});
+
+            for (Ammunition ammo : ammoList) {
+                System.out.println(ammo);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     public static ArrayList<Entity> parseItems(Reader reader) throws IOException {
         System.out.println("[DEBUG] Starting parseProvinces...");
         ArrayList<Entity> technology = new ArrayList<>();
@@ -247,7 +272,6 @@ public class ProvinceParser {
                 System.err.println("Number format error in technology line: " + line);
             }
         }
-
         return technology;
     }
 

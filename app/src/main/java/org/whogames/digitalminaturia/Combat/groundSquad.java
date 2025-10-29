@@ -30,11 +30,13 @@ public class groundSquad extends Squad {
         vehicles = new HashMap<>();
     }
 
-        public groundSquad(int id, String name, int health, String type, String country, String ammo, int personnel, ArrayList<Soldier> soldierList) {
+    public groundSquad(int id, String name, int health, String type, String country, String ammo, int personnel, ArrayList<Soldier> soldierList) {
         super(id, name, health, type, country, ammo, personnel);
         soldiers = new HashMap<>();
+        int i = 0;
         for (Soldier soldier : soldierList) {
-            soldiers.put(soldier.getType(), soldier);
+            soldiers.put("Soldier "+i, soldier);
+            i++;
         }
         vehicles = new HashMap<>();
     }
