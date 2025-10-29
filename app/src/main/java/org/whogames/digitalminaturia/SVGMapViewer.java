@@ -147,6 +147,7 @@ public class SVGMapViewer {
             copyResourceToFile("Minaturia Technology.csv", new File(dataDir, "Minaturia Technology.csv"));
             copyResourceToFile("Minaturia Ammunition.json", new File(dataDir, "Minaturia Ammunition.json"));
             copyResourceToFile("Minaturia Vehicles.json", new File(dataDir, "Minaturia Vehicles.json"));
+            copyResourceToFile("Minaturia Squads.json", new File(dataDir, "Minaturia Squads.json"));
             copyResourceToFile("Minaturia Edges.csv", new File(dataDir, "Minaturia Edges.csv"));
             copyResourceToFile("Map Layer.svg", new File(dataDir, "Map Layer.svg"));
             copyResourceToFile("Production Layer.svg", new File(dataDir, "Production Layer.svg"));
@@ -216,8 +217,9 @@ public class SVGMapViewer {
             }
             ProvinceParser.parseInventory(new FileReader(invFile), country, entityMap);
         }
-        
+
         ProvinceParser.parseNewItems();
+        ProvinceParser.parseNewSquads();
 
         executor.shutdown();
 

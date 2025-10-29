@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -18,10 +19,14 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import org.whogames.digitalminaturia.Combat.Edge;
+import org.whogames.digitalminaturia.Combat.Squad;
+import org.whogames.digitalminaturia.Combat.groundSquad;
 import org.whogames.digitalminaturia.Combat.Entities.Ammunition;
 import org.whogames.digitalminaturia.Combat.Entities.Entity;
 import org.whogames.digitalminaturia.Combat.Entities.Firearm;
 import org.whogames.digitalminaturia.Combat.Entities.Vehicle;
+import org.whogames.digitalminaturia.Registries.entityRegistry;
+import org.whogames.digitalminaturia.Registries.squadRegistry;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -203,12 +208,28 @@ public class ProvinceParser {
                 new TypeReference<List<Ammunition>>() {}
             );
 
-            // Option 2: Read from string
-            // String json = "[{...}]";
-            // List<Ammunition> ammoList = mapper.readValue(json, new TypeReference<List<Ammunition>>() {});
-
             for (Ammunition ammo : ammoList) {
                 System.out.println(ammo);
+                entityRegistry.register(ammo);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void parseNewSquads() {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+
+            // Option 1: Read from file
+            List<groundSquad> squadList = mapper.readValue(
+                new File(dataDir, "Minaturia Squads.json"),
+                new TypeReference<List<groundSquad>>() {}
+            );
+
+            for (Squad squad : squadList) {
+                System.out.println(squad);
+                squadRegistry.register(squad);
             }
         } catch (Exception e) {
             e.printStackTrace();
