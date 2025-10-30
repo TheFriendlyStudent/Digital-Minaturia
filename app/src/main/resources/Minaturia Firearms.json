@@ -8,8 +8,8 @@
     "lcost": 0.97,
     "ammunition": "7x30mm",
     "capacity": 8,
-    "reload time": 1,
-    "rate of fire": 3
+    "reloadTime": 1,
+    "fireRate": 3
   },
   {
     "name": "R-1",
@@ -20,8 +20,8 @@
     "lcost": 0.75,
     "ammunition": "7x30mm",
     "capacity": 6,
-    "reload time": 2,
-    "rate of fire": 2
+    "reloadTime": 2,
+    "fireRate": 2
   },
   {
     "name": "Service Seven",
@@ -32,8 +32,8 @@
     "lcost": 0.7,
     "ammunition": "7x30mm",
     "capacity": 7,
-    "reload time": 1,
-    "rate of fire": 3
+    "reloadTime": 1,
+    "fireRate": 3
   },
   {
     "name": "W17",
@@ -44,8 +44,8 @@
     "lcost": 0.96,
     "ammunition": "9x20mm",
     "capacity": 15,
-    "reload time": 1,
-    "rate of fire": 3
+    "reloadTime": 1,
+    "fireRate": 3
   },
   {
     "name": "SP-2",
@@ -56,8 +56,8 @@
     "lcost": 3.3,
     "ammunition": "6x30mm",
     "capacity": 25,
-    "reload time": 1,
-    "rate of fire": 20
+    "reloadTime": 1,
+    "fireRate": 20
   },
   {
     "name": "SP-3",
@@ -68,8 +68,8 @@
     "lcost": 3.35,
     "ammunition": "7x30mm",
     "capacity": 30,
-    "reload time": 1,
-    "rate of fire": 20
+    "reloadTime": 1,
+    "fireRate": 20
   },
   {
     "name": "AR-α",
@@ -80,8 +80,8 @@
     "lcost": 3.3,
     "ammunition": "7x45mm",
     "capacity": 30,
-    "reload time": 1,
-    "rate of fire": 3
+    "reloadTime": 1,
+    "fireRate": 3
   },
   {
     "name": "SK-7",
@@ -92,8 +92,8 @@
     "lcost": 3,
     "ammunition": "7x45mm",
     "capacity": 30,
-    "reload time": 1,
-    "rate of fire": 3
+    "reloadTime": 1,
+    "fireRate": 3
   },
   {
     "name": "TMA-10",
@@ -104,8 +104,8 @@
     "lcost": 3.3,
     "ammunition": "7x45mm",
     "capacity": 30,
-    "reload time": 1,
-    "rate of fire": 3
+    "reloadTime": 1,
+    "fireRate": 3
   },
   {
     "name": "G-157",
@@ -116,8 +116,8 @@
     "lcost": 4,
     "ammunition": "7x55mm",
     "capacity": 5,
-    "reload time": 1,
-    "rate of fire": 1
+    "reloadTime": 1,
+    "fireRate": 1
   },
   {
     "name": "K-5",
@@ -128,8 +128,8 @@
     "lcost": 3.13,
     "ammunition": "7x55mm",
     "capacity": 5,
-    "reload time": 1,
-    "rate of fire": 1
+    "reloadTime": 1,
+    "fireRate": 1
   },
   {
     "name": "G-1512",
@@ -140,8 +140,8 @@
     "lcost": 4.49,
     "ammunition": "7x55mm",
     "capacity": 20,
-    "reload time": 1,
-    "rate of fire": 2
+    "reloadTime": 1,
+    "fireRate": 2
   },
   {
     "name": "K-6",
@@ -152,8 +152,8 @@
     "lcost": 4.5,
     "ammunition": "7x55mm",
     "capacity": 10,
-    "reload time": 1,
-    "rate of fire": 2
+    "reloadTime": 1,
+    "fireRate": 2
   },
   {
     "name": "Mk II SLR (6mm)",
@@ -164,8 +164,8 @@
     "lcost": 4,
     "ammunition": "6x50mm",
     "capacity": 20,
-    "reload time": 1,
-    "rate of fire": 2
+    "reloadTime": 1,
+    "fireRate": 2
   },
   {
     "name": "Mk II SLR (7mm)",
@@ -176,8 +176,8 @@
     "lcost": 3.4,
     "ammunition": "7x55mm",
     "capacity": 20,
-    "reload time": 1,
-    "rate of fire": 2
+    "reloadTime": 1,
+    "fireRate": 2
   },
   {
     "name": "MS-1",
@@ -188,8 +188,8 @@
     "lcost": 2,
     "ammunition": "7x55mm",
     "capacity": 20,
-    "reload time": 1,
-    "rate of fire": 2
+    "reloadTime": 1,
+    "fireRate": 2
   },
   {
     "name": "RC-α",
@@ -200,8 +200,8 @@
     "lcost": 6,
     "ammunition": "7x55mm",
     "capacity": 20,
-    "reload time": 1,
-    "rate of fire": 2
+    "reloadTime": 1,
+    "fireRate": 2
   },
   {
     "name": "GR-α",
@@ -212,8 +212,8 @@
     "lcost": 3,
     "ammunition": "7x55mm",
     "capacity": 30,
-    "reload time": 1,
-    "rate of fire": 9
+    "reloadTime": 1,
+    "fireRate": 9
   },
   {
     "name": "SA-3",
@@ -224,8 +224,8 @@
     "lcost": 4,
     "ammunition": "6x50mm",
     "capacity": 30,
-    "reload time": 1,
-    "rate of fire": 9
+    "reloadTime": 1,
+    "fireRate": 9
   },
   {
     "name": "SA-4",
@@ -236,8 +236,8 @@
     "lcost": 3,
     "ammunition": "7x55mm",
     "capacity": 30,
-    "reload time": 1,
-    "rate of fire": 15
+    "reloadTime": 1,
+    "fireRate": 15
   },
   {
     "name": "AG-1S",
@@ -248,8 +248,8 @@
     "lcost": 3,
     "ammunition": "7x55mm",
     "capacity": 100,
-    "reload time": 2,
-    "rate of fire": 15
+    "reloadTime": 2,
+    "fireRate": 15
   },
   {
     "name": "MG-1710k",
@@ -260,8 +260,8 @@
     "lcost": 2,
     "ammunition": "7x55mm",
     "capacity": 100,
-    "reload time": 2,
-    "rate of fire": 30
+    "reloadTime": 2,
+    "fireRate": 30
   },
   {
     "name": "SMP-2",
@@ -272,8 +272,8 @@
     "lcost": 2,
     "ammunition": "7x55mm",
     "capacity": 100,
-    "reload time": 2,
-    "rate of fire": 15
+    "reloadTime": 2,
+    "fireRate": 15
   },
   {
     "name": "AG-1",
@@ -284,8 +284,8 @@
     "lcost": 3.5,
     "ammunition": "7x55mm",
     "capacity": 250,
-    "reload time": 2,
-    "rate of fire": 15
+    "reloadTime": 2,
+    "fireRate": 15
   },
   {
     "name": "MG-1820k",
@@ -296,8 +296,8 @@
     "lcost": 3.2,
     "ammunition": "7x55mm",
     "capacity": 250,
-    "reload time": 2,
-    "rate of fire": 30
+    "reloadTime": 2,
+    "fireRate": 30
   },
   {
     "name": "GR-1",
@@ -308,8 +308,8 @@
     "lcost": 4.3,
     "ammunition": "75mm RG-1",
     "capacity": 1,
-    "reload time": 1,
-    "rate of fire": 1
+    "reloadTime": 1,
+    "fireRate": 1
   },
   {
     "name": "SG-1",
@@ -320,8 +320,8 @@
     "lcost": 5.7,
     "ammunition": "51x300mm",
     "capacity": 1,
-    "reload time": 1,
-    "rate of fire": 1
+    "reloadTime": 1,
+    "fireRate": 1
   },
   {
     "name": "SG-2",
@@ -332,8 +332,8 @@
     "lcost": 3.7,
     "ammunition": "75x400mm",
     "capacity": 1,
-    "reload time": 1,
-    "rate of fire": 1
+    "reloadTime": 1,
+    "fireRate": 1
   },
   {
     "name": "AK-1",
@@ -344,8 +344,8 @@
     "lcost": 2.6,
     "ammunition": "25x200mm",
     "capacity": 250,
-    "reload time": 3,
-    "rate of fire": 8
+    "reloadTime": 3,
+    "fireRate": 8
   },
   {
     "name": "AK-2",
@@ -356,8 +356,8 @@
     "lcost": 6.4,
     "ammunition": "25x200mm",
     "capacity": 500,
-    "reload time": 6,
-    "rate of fire": 180
+    "reloadTime": 6,
+    "fireRate": 180
   },
   {
     "name": "AK-80",
@@ -368,8 +368,8 @@
     "lcost": 3.5,
     "ammunition": "25x200mm",
     "capacity": 400,
-    "reload time": 1,
-    "rate of fire": 1
+    "reloadTime": 1,
+    "fireRate": 1
   },
   {
     "name": "C-80",
@@ -380,8 +380,8 @@
     "lcost": 6.3,
     "ammunition": "80x610mm",
     "capacity": 1,
-    "reload time": 1,
-    "rate of fire": 1
+    "reloadTime": 1,
+    "fireRate": 1
   },
   {
     "name": "G-90",
@@ -392,8 +392,8 @@
     "lcost": 4.4,
     "ammunition": "90x600mm",
     "capacity": 1,
-    "reload time": 1,
-    "rate of fire": 1
+    "reloadTime": 1,
+    "fireRate": 1
   },
   {
     "name": "LK-1",
@@ -404,8 +404,8 @@
     "lcost": 5.6,
     "ammunition": "75x500mm",
     "capacity": 1,
-    "reload time": 1,
-    "rate of fire": 1
+    "reloadTime": 1,
+    "fireRate": 1
   },
   {
     "name": "Pc. 40",
@@ -416,8 +416,8 @@
     "lcost": 3.4,
     "ammunition": "40x305mm",
     "capacity": 1,
-    "reload time": 1,
-    "rate of fire": 1
+    "reloadTime": 1,
+    "fireRate": 1
   },
   {
     "name": "Pc. 85",
@@ -428,8 +428,8 @@
     "lcost": 4.5,
     "ammunition": "85x620mm",
     "capacity": 1,
-    "reload time": 1,
-    "rate of fire": 1
+    "reloadTime": 1,
+    "fireRate": 1
   },
   {
     "name": "PG-1",
@@ -440,8 +440,8 @@
     "lcost": 3.4,
     "ammunition": "25x200mm",
     "capacity": 1,
-    "reload time": 1,
-    "rate of fire": 1
+    "reloadTime": 1,
+    "fireRate": 1
   },
   {
     "name": "TC-α",
@@ -452,7 +452,7 @@
     "lcost": 3.5,
     "ammunition": "25x200mm",
     "capacity": 1,
-    "reload time": 1,
-    "rate of fire": 1
+    "reloadTime": 1,
+    "fireRate": 1
   }
 ]

@@ -78,11 +78,11 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.events.EventTarget;
 import org.w3c.dom.svg.SVGDocument;
-import org.whogames.digitalminaturia.Combat.combatEngine;
 import org.whogames.digitalminaturia.Combat.Entities.Ammunition;
 import org.whogames.digitalminaturia.Combat.Entities.Entity;
 import org.whogames.digitalminaturia.Combat.Entities.Firearm;
 import org.whogames.digitalminaturia.Combat.Entities.Vehicle;
+import org.whogames.digitalminaturia.Combat.combatEngine;
 
 public class SVGMapViewer {
 
@@ -148,6 +148,7 @@ public class SVGMapViewer {
             copyResourceToFile("Minaturia Ammunition.json", new File(dataDir, "Minaturia Ammunition.json"));
             copyResourceToFile("Minaturia Vehicles.json", new File(dataDir, "Minaturia Vehicles.json"));
             copyResourceToFile("Minaturia Squads.json", new File(dataDir, "Minaturia Squads.json"));
+            copyResourceToFile("Minaturia Firearms.json", new File(dataDir, "Minaturia Firearms.json"));
             copyResourceToFile("Minaturia Edges.csv", new File(dataDir, "Minaturia Edges.csv"));
             copyResourceToFile("Map Layer.svg", new File(dataDir, "Map Layer.svg"));
             copyResourceToFile("Production Layer.svg", new File(dataDir, "Production Layer.svg"));
@@ -218,7 +219,9 @@ public class SVGMapViewer {
             ProvinceParser.parseInventory(new FileReader(invFile), country, entityMap);
         }
 
-        ProvinceParser.parseNewItems();
+        ProvinceParser.parseNewAmmo();
+        ProvinceParser.parseNewFirearms();
+        ProvinceParser.parseNewVehicles();
         ProvinceParser.parseNewSquads();
 
         executor.shutdown();

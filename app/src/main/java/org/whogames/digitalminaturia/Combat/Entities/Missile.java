@@ -41,7 +41,7 @@ public class Missile implements Entity {
     }
 
     @Override
-    public int getWeight() {
+    public double getWeight() {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 

@@ -52,7 +52,7 @@ public class Ammunition implements Entity {
     public void setPcost(double pcost) { this.pcost = pcost; }
     public void setLcost(double lcost) { this.lcost = lcost; }
     public void setDamage(int damage) { this.damage = damage; }
-    public void setWeight(int weight) { this.weight = weight; }
+    public void setWeight(double weight) { this.weight = weight; }
     public void setPenetration(double penetration) { this.penetration = penetration; }
 
     @Override
@@ -102,9 +102,14 @@ public class Ammunition implements Entity {
     }
 
     @Override
-    public int getWeight() {
+    public double getWeight() {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'getWeight'");
+    }
+
+    public int getDamage() {
+        // TODO Auto-generated method stub
+        return damage;
     }
 
     

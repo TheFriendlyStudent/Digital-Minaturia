@@ -14,7 +14,7 @@ public interface Entity {
 
     int getLaborCost();
 
-    int getWeight();
+    double getWeight();
 
     Object[] getAtts();
 
