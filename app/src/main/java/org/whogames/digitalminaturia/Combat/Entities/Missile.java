@@ -4,9 +4,10 @@ public class Missile implements Entity {
 
     private String name;
     private String type;
-    private int units;
     private String country;
-    private double cost;
+    private double pcost;
+    private double lcost;
+    private int damage;
 
     @Override
     public String getName() {
@@ -40,7 +41,7 @@ public class Missile implements Entity {
     }
 
     @Override
-    public int getWeight() {
+    public double getWeight() {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 

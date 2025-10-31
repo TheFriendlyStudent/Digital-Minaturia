@@ -5,18 +5,37 @@ public class Ammunition implements Entity {
     private String name;
     private String type;
     private String country;
-    private int unit;
-    private double cost;
+    private double pcost;
+    private double lcost;
+    private int damage;
+    private double penetration;
+    private double weight;
     public static String types[] = {"Intermediate Round", "Pistol Round", "SAM", "Rifle Round", "ATGM", 
     "Artillery Shell", "Missile", "Bomb", "Grenade", "RCL Round", "Cannon Round", "Depth Charge", 
     "Torpedo", "AAM", "TBM"};
 
-    public Ammunition(String name, String type, String country, int unit, double cost) {
+    public Ammunition() {
+
+    }
+
+    public Ammunition(String name, String country, String type, double pcost, double lcost, double weight, int damage, double penetration) {
         this.name = name;
         this.type = type;
         this.country = country;
-        this.unit = unit;
-        this.cost = cost;
+        this.pcost = pcost;
+        this.lcost = lcost;
+        this.weight = weight;
+        this.damage = damage;
+        this.penetration = penetration;
+    }
+
+    public Ammunition(String name, String country, String type, double pcost, double lcost) {
+        this.name = name;
+        this.type = type;
+        this.country = country;
+        this.pcost = pcost;
+        this.lcost = lcost;
+        this.damage = 10;
     }
 
     @Override
@@ -24,14 +43,17 @@ public class Ammunition implements Entity {
         return name;
     }
 
-    public double getCost() {
-        return cost;
-    }
-
     @Override
     public String getCountry() {
         return country;
     }
+
+    public void setType(String type) { this.type = type; }
+    public void setPcost(double pcost) { this.pcost = pcost; }
+    public void setLcost(double lcost) { this.lcost = lcost; }
+    public void setDamage(int damage) { this.damage = damage; }
+    public void setWeight(double weight) { this.weight = weight; }
+    public void setPenetration(double penetration) { this.penetration = penetration; }
 
     @Override
     public Object[] getAtts() {
@@ -48,8 +70,6 @@ public class Ammunition implements Entity {
                 + "name='" + name + '\''
                 + ", type='" + type + '\''
                 + ", country='" + country + '\''
-                + ", unit=" + unit
-                + ", cost=" + cost
                 + '}';
     }
 
@@ -82,9 +102,16 @@ public class Ammunition implements Entity {
     }
 
     @Override
-    public int getWeight() {
+    public double getWeight() {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'getWeight'");
     }
+
+    public int getDamage() {
+        // TODO Auto-generated method stub
+        return damage;
+    }
+
+    
 
 }

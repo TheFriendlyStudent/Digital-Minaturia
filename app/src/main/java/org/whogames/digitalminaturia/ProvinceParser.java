@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -18,10 +19,22 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import org.whogames.digitalminaturia.Combat.Edge;
+import org.whogames.digitalminaturia.Combat.Squad;
+import org.whogames.digitalminaturia.Combat.groundSquad;
 import org.whogames.digitalminaturia.Combat.Entities.Ammunition;
 import org.whogames.digitalminaturia.Combat.Entities.Entity;
 import org.whogames.digitalminaturia.Combat.Entities.Firearm;
 import org.whogames.digitalminaturia.Combat.Entities.Vehicle;
+import org.whogames.digitalminaturia.Combat.Entities.Weapon;
+import org.whogames.digitalminaturia.Registries.entityRegistry;
+import org.whogames.digitalminaturia.Registries.squadRegistry;
+
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 
 public class ProvinceParser {
 
@@ -190,6 +203,110 @@ public class ProvinceParser {
         return countries;
     }
 
+    public static void parseNewAmmo() {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+
+            // Option 1: Read from file
+            List<Ammunition> ammoList = mapper.readValue(
+                new File(dataDir, "Minaturia Ammunition.json"),
+                new TypeReference<List<Ammunition>>() {}
+            );
+
+            for (Ammunition ammo : ammoList) {
+                System.out.println(ammo);
+                entityRegistry.register(ammo);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void parseNewVehicles() {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+
+            SimpleModule module = new SimpleModule();
+
+            // Custom deserializer for Firearm references
+            module.addDeserializer(Firearm.class, new JsonDeserializer<Firearm>() {
+                @Override
+                public Firearm deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+                    String firearm = p.getText(); 
+                    return (Firearm) entityRegistry.get(firearm);
+                }
+            });
+
+            mapper.registerModule(module);
+
+
+            // Option 1: Read from file
+            List<Vehicle> vehicleList = mapper.readValue(
+                new File(dataDir, "Minaturia Vehicles.json"),
+                new TypeReference<List<Vehicle>>() {}
+            );
+
+            for (Vehicle vehicle : vehicleList) {
+                System.out.println(vehicle);
+                entityRegistry.register(vehicle);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void parseNewFirearms() {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+
+            SimpleModule module = new SimpleModule();
+
+            // Custom deserializer for Ammunition references
+            module.addDeserializer(Ammunition.class, new JsonDeserializer<Ammunition>() {
+                @Override
+                public Ammunition deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+                    String ammoName = p.getText(); // e.g. "7x30mm"
+                    return (Ammunition) entityRegistry.get(ammoName);
+                }
+            });
+
+            mapper.registerModule(module);
+
+            List<Firearm> firearmList = mapper.readValue(
+                new File(dataDir, "Minaturia Firearms.json"),
+                new TypeReference<List<Firearm>>() {}
+            );
+
+            for (Firearm firearm : firearmList) {
+                System.out.println(firearm);
+                entityRegistry.register(firearm);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    public static void parseNewSquads() {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+
+            // Option 1: Read from file
+            List<groundSquad> squadList = mapper.readValue(
+                new File(dataDir, "Minaturia Squads.json"),
+                new TypeReference<List<groundSquad>>() {}
+            );
+
+            for (Squad squad : squadList) {
+                System.out.println(squad);
+                squadRegistry.register(squad);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     public static ArrayList<Entity> parseItems(Reader reader) throws IOException {
         System.out.println("[DEBUG] Starting parseProvinces...");
         ArrayList<Entity> technology = new ArrayList<>();
@@ -247,7 +364,6 @@ public class ProvinceParser {
                 System.err.println("Number format error in technology line: " + line);
             }
         }
-
         return technology;
     }
 

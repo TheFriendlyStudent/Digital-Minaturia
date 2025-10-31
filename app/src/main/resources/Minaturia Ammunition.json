@@ -1,0 +1,172 @@
+[
+  {
+    "name": "6x30mm",
+    "country": "United Republic of Stoneland",
+    "type": "Pistol Round",
+    "weight": 0.04,
+    "pcost": 0.0002,
+    "lcost": 0.0037,
+    "damage": 0.45,
+    "penetration": 0
+  },
+  {
+    "name": "7x30mm",
+    "country": "United Republic of Stoneland",
+    "type": "Pistol Round",
+    "weight": 0.05,
+    "pcost": 0.0002,
+    "lcost": 0.0125,
+    "damage": 0.675,
+    "penetration": 0
+  },
+  {
+    "name": "9x20mm",
+    "country": "Workers' Republic of North Ostesia",
+    "type": "Pistol Round",
+    "weight": 0.05,
+    "pcost": 0.0002,
+    "lcost": 0.0113,
+    "damage": 0.82,
+    "penetration": 0
+  },
+  {
+    "name": "7x45mm",
+    "country": "United Republic of Stoneland",
+    "type": "Intermediate Round",
+    "weight": 0.09,
+    "pcost": 0.0003,
+    "lcost": 0.025,
+    "damage": 1.88,
+    "penetration": 0
+  },
+  {
+    "name": "6x50mm",
+    "country": "United Republic of Stoneland",
+    "type": "Rifle Round",
+    "weight": 0.12,
+    "pcost": 0.0003,
+    "lcost": 0.025,
+    "damage": 2.45,
+    "penetration": 0
+  },
+  {
+    "name": "7x55mm",
+    "country": "United Republic of Stoneland",
+    "type": "Rifle Round",
+    "weight": 0.12,
+    "pcost": 0.0003,
+    "lcost": 0.03,
+    "damage": 3,
+    "penetration": 0
+  },
+  {
+    "name": "40x55mm",
+    "country": "Workers' Republic of North Ostesia",
+    "type": "Launcher Grenade",
+    "weight": 2.5,
+    "pcost": 0.001,
+    "lcost": 0.25,
+    "damage": 3,
+    "penetration": 50
+  },
+  {
+    "name": "51x300mm",
+    "country": "United Republic of Stoneland",
+    "type": "Recoilless Rifle Round",
+    "weight": 50,
+    "pcost": 0.004,
+    "lcost": 3.175,
+    "damage": 6,
+    "penetration": 87
+  },
+  {
+    "name": "75mm RG-1",
+    "country": "Meehanistan",
+    "type": "Recoilless Rifle Round",
+    "weight": 100,
+    "pcost": 0.005,
+    "lcost": 3.25,
+    "damage": 6,
+    "penetration": 210
+  },
+  {
+    "name": "75x400mm",
+    "country": "United Republic of Stoneland",
+    "type": "Recoilless Rifle Round",
+    "weight": 75,
+    "pcost": 0.005,
+    "lcost": 6.35,
+    "damage": 9,
+    "penetration": 300
+  },
+  {
+    "name": "25x200mm",
+    "country": "United Republic of Stoneland",
+    "type": "Cannon Round",
+    "weight": 3.32,
+    "pcost": 0.002,
+    "lcost": 0.82,
+    "damage": 3,
+    "penetration": 45
+  },
+  {
+    "name": "40x305mm",
+    "country": "Scotchland",
+    "type": "Tank Round",
+    "weight": 35,
+    "pcost": 0.003,
+    "lcost": 2.15,
+    "damage": 6,
+    "penetration": 77
+  },
+  {
+    "name": "75x500mm",
+    "country": "United Republic of Stoneland",
+    "type": "Tank Round",
+    "weight": 75,
+    "pcost": 0.008,
+    "lcost": 10,
+    "damage": 9,
+    "penetration": 200
+  },
+  {
+    "name": "80x610mm",
+    "country": "People's Republic of Titania",
+    "type": "Tank Round",
+    "weight": 80,
+    "pcost": 0.008,
+    "lcost": 15,
+    "damage": 10,
+    "penetration": 210
+  },
+  {
+    "name": "85x620mm",
+    "country": "Scotchland",
+    "type": "Tank Round",
+    "weight": 85,
+    "pcost": 0.008,
+    "lcost": 16.4,
+    "damage": 11,
+    "penetration": 210
+  },
+  {
+    "name": "90x600mm",
+    "country": "Brazealian Guinea",
+    "type": "Tank Round",
+    "weight": 90,
+    "pcost": 0.008,
+    "lcost": 16.3,
+    "damage": 12,
+    "penetration": 190
+  },
+  {
+    "name": "100x700mm",
+    "country": "Meehanistan",
+    "type": "Tank Round",
+    "weight": 100,
+    "pcost": 0.01,
+    "lcost": 20,
+    "damage": 14,
+    "penetration": 200
+  }
+]
