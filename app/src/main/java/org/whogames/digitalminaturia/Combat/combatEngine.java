@@ -8,7 +8,7 @@ import java.util.ArrayList;
 
 import org.whogames.digitalminaturia.Province;
 import org.whogames.digitalminaturia.ProvinceParser;
-import org.whogames.digitalminaturia.SVGMapViewer;
+import org.whogames.digitalminaturia.UI.SVGMapViewer;
 
 public class combatEngine {
 

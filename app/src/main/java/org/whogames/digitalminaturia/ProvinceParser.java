@@ -28,6 +28,7 @@ import org.whogames.digitalminaturia.Combat.Entities.Vehicle;
 import org.whogames.digitalminaturia.Combat.Entities.Weapon;
 import org.whogames.digitalminaturia.Registries.entityRegistry;
 import org.whogames.digitalminaturia.Registries.squadRegistry;
+import org.whogames.digitalminaturia.UI.SVGMapViewer;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.type.TypeReference;

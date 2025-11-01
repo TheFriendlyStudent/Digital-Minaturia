@@ -2,6 +2,8 @@ package org.whogames.digitalminaturia;
 
 import javax.swing.SwingUtilities;
 
+import org.whogames.digitalminaturia.UI.SVGMapViewer;
+
 public class Main {
     public static void main(String[] args) {
 

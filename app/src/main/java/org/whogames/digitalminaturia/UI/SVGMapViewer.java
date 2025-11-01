@@ -1,4 +1,4 @@
-package org.whogames.digitalminaturia;
+package org.whogames.digitalminaturia.UI;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
@@ -82,6 +82,9 @@ import org.whogames.digitalminaturia.Combat.Entities.Ammunition;
 import org.whogames.digitalminaturia.Combat.Entities.Entity;
 import org.whogames.digitalminaturia.Combat.Entities.Firearm;
 import org.whogames.digitalminaturia.Combat.Entities.Vehicle;
+import org.whogames.digitalminaturia.Country;
+import org.whogames.digitalminaturia.Province;
+import org.whogames.digitalminaturia.ProvinceParser;
 import org.whogames.digitalminaturia.Combat.combatEngine;
 
 public class SVGMapViewer {
